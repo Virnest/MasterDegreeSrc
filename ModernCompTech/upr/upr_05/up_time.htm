@@ -1,0 +1,106 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 5. Использование таймера TTimer</FONT>
+<hr>
+Среда DELPHI имеет компонент <b>TTimer</b> (находится на странице System), имитирующий работу Таймера. 
+Данный компонент генерирует событие <b>OnTimer</b> после прохождения 
+промежутка времени, задаваемого свойством <b>Interval</b>. Интервал 
+времени задается целым числом, равным количеству тысячных долей секунды.
+Таким образом, интервал в одну секунду соответствует 1000, полсекунды - 500,
+3 секунды - 3000 и т.д.<br>
+Используя компонент <b>TTimer</b>, попробуем оживить Маску, заставив ее
+моргать глазами. Пусть открытые глаза рисуются с помощью процедуры
+<b>Glaz</b>, описанной в <a href="../upr_03/up_move.htm">упражнении 3</a>.<br> 
+Для закрытого глаза опишем еще одну процедуру и разместим ее в секции <b>implementation</b>
+библиотечного модуля <b>UnPic.pas</b> (<a href="../upr_04/up_unit.htm">упражнение 4</a>) 
+вместе с процедурами рисования Маски: 
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=RED>// закрытый глаз</FONT>
+<b>procedure</b> GlazOff(CNV: TCanvas; x,y: integer; CL: TColor);  
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b>
+    <b>begin</b> 
+      Brush.Color:=CL;       
+      Ellipse(x,y,x+25,y+100);
+      Brush.Color:=clBlack;     
+      MoveTo(x+5,y+62); LineTo(x+20,y+62);
+    <b>end</b>;
+<b>end</b>;
+</FONT></PRE>
+Заголовки процедур <b>Glaz</b> и <b>GlazOff</b>: 
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=RED>// закрытый глаз</FONT>
+<b>procedure</b> GlazOff(CNV: TCanvas; x,y: integer; CL: TColor);  
+<FONT COLOR=RED>// открытый глаз</FONT>
+<b>procedure</b> Glaz(CNV: TCanvas; x,y: integer; CL: TColor);  
+</FONT></PRE>
+скопируем в секцию <b>interface</b> модуля <b>UnPic.pas</b>.<br><br>
+
+В программе из <a href="../upr_04/up_unit.htm">упражнения 4</a> изменим 
+обработчик события <b>OnPaint</b>, рисуя только одну Маску с фиксированными
+значениями цвета и координат якорной точки:
+<PRE><FONT COLOR=BLUE> 
+<b>procedure</b> TForm1.FormPaint(Sender: TObject);
+<b>begin</b>
+   Maska(Canvas,50,50,clGreen,clBlue,clNavy,clRed);
+<b>end</b>;
+</FONT></PRE>
+
+На странице <b>System</b> палитры компонент выберем <b>TTimer</b> и
+поместим его на нашу форму. Свойству <b>Interval</b> данного компонента
+присвоим значение 3000. Перейдем на страницу <b>Events</b> инспектора
+объектов и щелкнем на обработчике события <b>OnTimer</b>. В появивщейся
+заготовке обработчика данного события опишем следующий код
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.Timer1Timer(Sender: TObject);  
+<b>begin</b> 
+  <b>if</b> Timer1.Interval=3000 <b>then</b>
+   <b>begin</b> Timer1.Interval:=50;
+     GlazOff(Canvas,100,100,clGreen); <FONT COLOR=RED>//левый глаз</FONT>
+     GlazOff(Canvas,175,100,clGreen); <FONT COLOR=RED>//правый глаз</FONT>
+   <b>end</b>                    <b>else</b>
+   <b>begin</b> Timer1.Interval:=3000;
+     Glaz(Canvas,100,100,clBlue); <FONT COLOR=RED>//левый глаз</FONT>
+     Glaz(Canvas,175,100,clBlue); <FONT COLOR=RED>//правый глаз</FONT>
+   <b>end</b>;
+<b>end</b>;
+</FONT></PRE>
+Обращение к обработчику Таймера выполняется лишь после истечения заданного
+интервала времени. При старте программы задан интервал в 3 секунды. После
+его завершения выполняется код обработчика. Если установленное значение 
+интервала равно 3 секундам, то оно переустанавливается на значение 0,05 
+секунды и рисуются глаза в закрытом состоянии. Иначе значение интервала
+возвращается к 3 секундам и рисуются глаза в открытом состоянии. Если
+запустить программу можно наблюдать как Маска моргает.<br><br>
+
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="Maska5.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<img SRC="../../PIC/zadan.gif" ALIGN=LEFT>
+ <FONT SIZE=6><u><i>Задание для самостоятельного выполнения</i></u></FONT><br>
+Разработать программу, рисующую Маску, которая 
+<OL>
+  <LI>то улыбается, то серьезна;
+  <LI>то хмурится, то нет;
+  <LI>то делает удивленные глаза, то нет;
+  <LI>стреляет глазами из стороны в сторону;
+  <LI>то открывает, то закрывает рот;
+  <LI>то показывает язык, то нет;
+  <LI>то морщит нос, то нет;
+  <LI>вращает носом;
+  <LI>то волосы встают дыбом, то нет;
+  <LI>периодически шевелит ушами;
+  <LI>меняет цвет ушей;
+</OL>
+<hr>
+<a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</HTML>

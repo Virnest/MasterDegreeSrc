@@ -1,0 +1,177 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 3. Маска в произвольных координатах</FONT>
+<hr>
+<IMG src="ris2.gif" align=left>
+<P>Недостатком программы, реализованной в <a href="../UPR_02/up_nish.htm">упражнении 2</a>, 
+является то, что Маска рисуется только в определенном месте формы в прямоугольнике 
+с координатами А(50;50)-В(250;350) и определенными цветами. Хотелось бы иметь 
+программу рисования Маски такого же размера, но в произвольном месте формы и 
+любыми цветами.</P>
+
+<P>Для реализации подобной программы введем для Маски локальную систему координат 
+X'Y' с началом координат в точке А. Тогда координаты всех остальных точек Маски
+можно пересчитать относительно локальной системы координат, т.е. точки А. 
+Точку графического объекта в которой расположено начало местной системы
+координат объекта часто называют <i>якорной точкой</i>.</P><br><br>
+
+<P>Процедура рисования Контура Маски в относительных координатах будет выглядеть
+следующим образом:
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=RED>// рисуем контур маски
+// x,y - координаты якорной точки;
+// CL  - цвет заливки</FONT>
+<b>procedure</b> Kontur(CNV: TCanvas; x,y: integer; CL: TColor); 
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b>   
+    <b>begin</b> Pen.Style:=psSolid;
+      Pen.Color:=clBlack;    
+      Pen.Width:=3;           
+      Brush.Style:=bsSolid;   
+      Brush.Color:=CL;          <FONT COLOR=RED>// цвет заливки CL</FONT>
+      Ellipse(x,y,x+200,y+300); <FONT COLOR=RED>// эллипс в относительных координатах</FONT>
+    <b>end</b>;
+<b>end</b>;
+</FONT></PRE>
+Аналогичные изменения вносим в остальные процедуры:
+<PRE><FONT COLOR=BLUE> 
+<FONT COLOR=RED>// рисуем глаз</FONT>
+<b>procedure</b> Glaz(CNV: TCanvas; x,y: integer; CL: TColor); 
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b>
+    <b>begin</b> 
+      Brush.Color:=CL;       
+      Ellipse(x,y,x+25,y+100);
+      Brush.Color:=clBlack;     
+      Ellipse(x+5,y+50,x+20,y+75);
+    <b>end</b>;
+<b>end</b>;
+<FONT COLOR=RED>// рисуем нос</FONT>
+<b>procedure</b> Nos(CNV: TCanvas; x,y: integer; CL: TColor);  
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b>  
+    <b>begin</b> 
+      Brush.Color:=CL;     
+      Rectangle(x+95,y+50,x+105,y+215); 
+    <b>end</b>;
+<b>end</b>;
+<FONT COLOR=RED>// рисуем рот</FONT>
+<b>procedure</b> Rot(CNV: TCanvas; x,y: integer; CL: TColor);  
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b> 
+    <b>begin</b> 
+      Brush.Color:=CL;     
+      Rectangle(x+50,y+225,x+150,y+235); 
+    <b>end</b>;
+<b>end</b>;
+</FONT></PRE>
+Исполнитель Маска можно переписать в следующем виде:
+<PRE><FONT COLOR=BLUE> 
+<FONT COLOR=RED>// исполнитель МАСКА
+// x,y - координаты якорной точки;
+// CLK - цвет заливки контура;
+// CLG - цвет заливки глаз;
+// CLN - цвет заливки носа;
+// CLR - цвет заливки рта.</FONT> 
+<b>procedure</b> Maska(CNV: TCanvas; x,y: integer; CLK,CLG,CLN,CLR: TColor); 
+<b>begin</b> 
+   Kontur(CNV,x,y,CLK);
+   Glaz(CNV,x+50,y+50,CLG); <FONT COLOR=RED>//левый глаз</FONT> 
+   Glaz(CNV,x+125,y+50,CLG); <FONT COLOR=RED>//правый глаз</FONT> 
+   Nos(CNV,x,y,CLN);
+   Rot(CNV,x,y,CLR);
+<b>end</b>;
+</FONT></PRE>
+Изменим обработчик события <b>OnPaint</b> таким образом, чтобы рисовалось 
+10 Масок в случайном положении и случайного цвета.
+<PRE><FONT COLOR=BLUE> 
+<b>procedure</b> TForm1.FormPaint(Sender: TObject);
+<b>var</b> k : word;    x,y : integer;   C1,C2,C3,C4 : TColor;
+<b>begin</b>
+ <b>for</b> k:=1 <b>to</b> 10 <b>do</b>
+  <b>begin</b>
+   x:=Random(ClientWidth-200);  
+   y:=Random(ClientHeight-300);
+   C1:=RGB(55+Random(201),55+Random(201),55+Random(201));
+   C2:=RGB(55+Random(201),55+Random(201),55+Random(201));
+   C3:=RGB(55+Random(201),55+Random(201),55+Random(201));
+   C4:=RGB(55+Random(201),55+Random(201),55+Random(201));
+   Maska(Canvas,x,y,C1,C2,C3,C4);
+  <b>end</b>;
+<b>end</b>;
+</FONT></PRE>
+Функция <b>Random</b>(N: word) является периодической с периодом 65536, 
+генерирующей последовательность псевдослучайных чисел из интервала от 0 до N-1, 
+подчиненных равномерному закону. Клавишей <b>F9</b> запустите задание и 
+посмотрите результат.<br><br>
+
+Если запускать данное приложение многократно, то расположение цветов будет 
+одинаково. Для генерации каждый раз нового расположения необходимо 
+инициализировать значение фазы датчика случайных чисел. Это можно сделать в 
+обработчике событий <b>OnCreate</b> формы. Для создания такого обработчика 
+поместите курсор на форму и щелкните левой клавишей мышки. На странице <b>Events</b> 
+инспектора объектов поместите курсор на поле значения события <b>OnCreate</b> и 
+щелкните левой клавишей мышки. В тексте модуля формы появится заготовка 
+процедуры отклика на событие <b>OnCreate</b>. Добавте вызов процедуры 
+<b>Randomize</b>. 
+
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.FormCreate(Sender: TObject);
+<b>begin</b>
+  Randomize;
+<b>end</b>;
+</FONT></PRE>
+
+Процедура <b>Randomize</b> использует текущее значение системных часов для 
+определения начального значения (фазы) датчика случайных чисел <b>Random</b>.<br><br> 
+
+Для многократной генерации нового распределения цветов поместим на форму кнопку 
+<b>SpeedButton</b> с палитры визуальных компонент. Данный компонент находится 
+на странице <b>Additional</b>. Выделите компонент <b>SpeedButton</b> на палитре
+и поместите кнопку в левом верхнем углу формы. Поместите курсор на появищуюся 
+кнопку и щелкните левой кнопкой мыши. Буден создан обработчик события <b>OnClick</b>
+кнопки. Поместите в обработчике следующий текст:  
+
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.SpeedButton1Click(Sender: TObject);
+<b>begin</b>
+  Canvas.Brush.Color:=clBtnFace;
+  Canvas.Rectangle(0,0,ClientWidth,ClientHeight);<FONT COLOR=RED>// стираем все на форме</FONT>
+  FormPaint(Sender);   <FONT COLOR=RED>// вызываем обработчик OnPaint</FONT>
+<b>end</b>;
+</FONT></PRE>
+
+Клавишей <b>F9</b> запустите задание и посмотрите результат.<br><br>
+
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="Maska3.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<img SRC="../../PIC/zadan.gif" ALIGN=LEFT>
+ <FONT SIZE=6><u><i>Задание для самостоятельного выполнения</i></u></FONT><br>
+Разработать методом нисходящего проектирования программу, выполняющую показанные ниже
+рисунки. Представить диаграмму исполнителей. Предусмотреть возможность
+рисования фигурки в произвольном месте формы и произвольным цветом. Добавить
+кнопку для перерисовки рисунка.
+<TABLE>
+ <TR><TD>Вариант 1</TD><TD>Вариант 2</TD><TD>Вариант 3</TD></TR>
+ <TR><TD><img SRC="Fr_ris_01.gif"></TD><TD><img SRC="Fr_ris_02.gif"></TD><TD><img SRC="Fr_ris_03.gif"></TD></TR>
+ <TR><TD>Вариант 4</TD><TD>Вариант 5</TD><TD>Вариант 6</TD></TR>
+ <TR><TD><img SRC="Fr_ris_04.gif"></TD><TD><img SRC="Fr_ris_05.gif"></TD><TD><img SRC="Fr_ris_06.gif"></TD></TR>
+ <TR><TD>Вариант 7</TD><TD>Вариант 8</TD><TD>Вариант 9</TD></TR>
+ <TR><TD><img SRC="Fr_ris_07.gif"></TD><TD><img SRC="Fr_ris_08.gif"></TD><TD><img SRC="Fr_ris_09.gif"></TD></TR>
+ <TR><TD>Вариант 10</TD><TD>Вариант 11</TD><TD>Вариант 12</TD></TR>
+ <TR><TD><img SRC="Fr_ris_10.gif"></TD><TD><img SRC="Fr_ris_11.gif"></TD><TD><img SRC="Fr_ris_12.gif"></TD></TR>
+</TABLE>
+
+<hr>
+<a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</HTML>

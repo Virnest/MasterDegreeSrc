@@ -1,0 +1,136 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 4. Создание библиотечного модуля</FONT>
+<hr>
+Процедуры рисования Маски, разработанные в <a href="../upr_03/up_move.htm">упражнении 3</a>,
+хотелось бы использовать не только в данной программе, но и влюбой другой. 
+Возможность повторного использования процедур реализуется в <i>Object Pascal</i>
+с помощью библиотечных модулей. 
+
+<P>Для создания нового модуля необходимо выполнить следующие действия:
+<OL>
+ <LI>выполнить команду <b>File > New</b>;
+ <LI>в появившемся окне <b>New Items</b> на странице <b>New</b> выбрать компонент <b>Unit</b> 
+     (для его появления полосой прокрутки переместиться в конец списка объектов).
+</OL>
+После выполнения данных команд в окне редактора появится заготовка с новым модулем.
+<PRE><FONT COLOR=BLUE>
+<b>unit</b> Unit1;
+
+<b>interface</b>
+
+<b>implementation</b>
+
+<b>end.</b>
+</FONT></PRE>
+Сохраним модуль на диске под именем UnitPic.pas. Для этого выполним команду
+<b>File > Save As</b> и в строке имени файла задать собственно имя UnitPic. Поместим 
+в модуль процедуры, связанные с рисованием Маски <a href="../upr_03/up_move.htm">упражнении 3</a>.</P>
+
+<b>Шаг 1</b>. В секции связи модуля поместим заголовок процедуры, рисующей 
+Маску (скопировав его из модуля формы <b>MainForm</b> упражнения 3)
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=RED>{##########}</FONT> <b>interface</b> <FONT COLOR=RED>{##########}</FONT>
+
+<b>uses</b> Graphics;    <FONT COLOR=RED>// подключаем модуль Graphics с описанием TCanvas</FONT>
+
+<FONT COLOR=RED>// исполнитель МАСКА
+// x,y - координаты якорной точки;
+// CLK - цвет заливки контура;     CLG - цвет заливки глаз;
+// CLN - цвет заливки носа;        CLR - цвет заливки рта.
+</FONT> 
+<b>procedure</b> Maska(CNV: TCanvas; x,y: integer; CLK,CLG,CLN,CLR: TColor); 
+</FONT></PRE>
+
+<b>Шаг 2</b>. В секции реализации разместим текст процедур рисования Маски. 
+Для этого необходимо скопировать данные процедуры из модуля формы <b>MainForm</b>
+упражнения 3 и вставить их в новый модуль.
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=RED>{##########}</FONT> <b>implementation</b> <FONT COLOR=RED>{##########}</FONT>
+
+<FONT COLOR=RED>// рисуем контур маски
+// x,y - координаты якорной точки;
+// CL  - цвет заливки</FONT>
+<b>procedure</b> Kontur(CNV: TCanvas; x,y: integer; CL: TColor); 
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b>   
+    <b>begin</b> Pen.Style:=psSolid;
+      Pen.Color:=clBlack;    
+      Pen.Width:=3;           
+      Brush.Style:=bsSolid;   
+      Brush.Color:=CL;          <FONT COLOR=RED>// цвет заливки CL</FONT>
+      Ellipse(x,y,x+200,y+300); <FONT COLOR=RED>// эллипс в относительных координатах</FONT>
+    <b>end</b>;
+<b>end</b>;
+<FONT COLOR=RED>// рисуем глаз</FONT>
+<b>procedure</b> Glaz(CNV: TCanvas; x,y: integer; CL: TColor); 
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b>
+    <b>begin</b> 
+      Brush.Color:=CL;       
+      Ellipse(x,y,x+25,y+100);
+      Brush.Color:=clBlack;     
+      Ellipse(x+5,y+50,x+20,y+75);
+    <b>end</b>;
+<b>end</b>;
+<FONT COLOR=RED>// рисуем нос</FONT>
+<b>procedure</b> Nos(CNV: TCanvas; x,y: integer; CL: TColor);  
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b>  
+    <b>begin</b> 
+      Brush.Color:=CL;     
+      Rectangle(x+95,y+50,x+105,y+115); 
+    <b>end</b>;
+<b>end</b>;
+<FONT COLOR=RED>// рисуем рот</FONT>
+<b>procedure</b> Rot(CNV: TCanvas; x,y: integer; CL: TColor);  
+<b>begin</b> 
+   <b>with</b> CNV <b>do</b> 
+    <b>begin</b> 
+      Brush.Color:=CL;     
+      Rectangle(x+50,y+225,x+150,y+235); 
+    <b>end</b>;
+<b>end</b>;
+
+<b>procedure</b> Maska; 
+<b>begin</b> 
+   Kontur(CNV,x,y,CLK);
+   Glaz(CNV,x+50,y+50,CLG); <FONT COLOR=RED>//левый глаз</FONT> 
+   Glaz(CNV,x+125,y+50,CLG); <FONT COLOR=RED>//правый глаз</FONT> 
+   Nos(CNV,x,y,CLN);
+   Rot(CNV,x,y,CLR);
+<b>end</b>;
+</FONT></PRE>
+Обратите внимание, что список формальных параметров у процедуры Maska убран.<br><br>
+
+<b>Шаг 3</b>.Для подключения библиотечного модуля достаточно в предложение 
+<b>uses</b> модуля формы <b>MainForm</b> добавить название модуля <b>UnitPic</b> 
+и удалить из модуля <b>MainForm</b> текст перенесенных в библиотечный модуль 
+процедур рисования Маски.
+
+<PRE><FONT COLOR=BLUE>
+<b>unit</b> MainForm;
+
+<FONT COLOR=RED>{##########}</FONT> <b>interface</b> <FONT COLOR=RED>{##########}</FONT>
+
+<b>uses</b>
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  UnitPic;
+</FONT></PRE>
+После удаления процедур рисования Маски в модуле формы останутся только
+процедуры обработки событий <b>OnPaint, OnCreate</b> и <b>OnClick</b> для кнопки перерисовки.
+Клавишей <b>F9</b> запустите задание и посмотрите результат. Он не должен 
+отличаться от результата упражнения 3<br><br>
+
+<img SRC="../../PIC/zadan.gif" ALIGN=LEFT>
+<FONT SIZE=6><u><i>Задание для самостоятельного выполнения</i></u></FONT><br>
+Создайте библиотечный модуль для вашего варианта из заданий для самостоятельного
+выполнения упражнения 3.
+<hr><a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</HTML>

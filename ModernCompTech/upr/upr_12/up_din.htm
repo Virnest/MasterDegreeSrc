@@ -1,0 +1,218 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 12. Динамические переменные</FONT>
+<hr>
+
+<i><b>Динамическая строка символов</b></i>.<br>
+<P>Любой текст состоит из строк и его можно рассматривать как одномерный массив 
+строк. Описать его в этом случае можно следующим образом<br>
+<FONT NAME=Courier New COLOR=BLUE>
+<b>type</b> TArrayString = array [1..1000] of ShortString;</FONT><br>
+Здесь предполагается, что текст содержит не более 1000 строк. 
+Короткая строка <i>ShortString</i> в языке <i>Object Pascal</i> может иметь 
+длину не более 255 символов и компилятор отводит под нее 256 байт памяти.
+Т.о. транслятор для переменной типа <i>TArrayString</i> выделит 256000 байт
+памяти. Однако, количество символов в строках может быть произвольным. 
+Поэтому хотелось бы иметь динамическую строку, память для которой выделялась
+бы в зависимости от числа символов, т.е. от длины строки.</P> 
+
+<P>Разработаем библиотечный модуль DStringLib, содержащий структуру данных и 
+процедуры поддержки динамической строки. Параметры динамической строки
+объединим в следующей записи
+<PRE><FONT NAME=Courier New COLOR=BLUE>
+<b>const</b>
+ BMax  = 2147483647;
+<b>type</b> 
+ ChType = array [1..BMax] of char;   ChPtr = ^ChType; 
+                                     TDStringPtr = ^TDString;
+TDString = <b>record</b>
+   L : word;    <FONT COLOR=GREEN>//длина строки от 0 до 65535 символов</FONT>
+   S : ChPtr;   <FONT COLOR=GREEN>//указатель на буфер строки</FONT>
+<b>end</b>;</FONT></PRE>
+Поле <i>L</i> служит для хранения текущей длины строки. Поле <i>S</i>
+является указателем на буфер памяти, где хранятся символы строки.
+Запишем основные процедуры для работы с динамической строкой:
+<PRE><FONT NAME=Courier New COLOR=BLUE>
+<FONT COLOR=GREEN>     // ===== инициализация пустой строки</FONT>
+<b>procedure</b> SDCreate(<b>var</b> SD: TDString);
+<b>Begin</b>
+  SD.L:=0; 
+  SD.S:=<b>Nil</b>;
+<b>End</b>;
+
+<FONT COLOR=GREEN>     // ===== освобождение памяти строки</FONT>
+<b>procedure</b> SDFree(<b>var</b> SD: TDString);    
+<b>Begin</b>
+  <b>if</b> SD.S<><b>Nil then</b> FreeMem(SD.S,SD.L); 
+  SD.L:=0;
+  SD.S:=<b>Nil</b>;
+<b>End</b>;
+
+<FONT COLOR=GREEN>     // ===== длина строки</FONT>
+<b>function</b> SDLength(<b>var</b> SD: TDString):word;    
+<b>Begin</b>
+  Result:=SD.L; 
+<b>End</b>;
+
+<FONT COLOR=GREEN>     // == занесение обычной строки</FONT>
+<b>procedure</b> SDSetStr(Sc: string; <b>var</b> SD: TDString);
+<b>var</b> Lc,k : word;
+<b>Begin</b>
+  SDFree(SD);          <FONT COLOR=GREEN>//освобождаем память</FONT>
+  Lc:=Length(Sc);      <FONT COLOR=GREEN>//определяем длину строки Sc</FONT>
+  <b>if</b> Lc>0 <b>then</b> 
+   <b>begin</b>
+    GetMem(SD.S,Lc);   <FONT COLOR=GREEN>//выделяем память под новую строку</FONT>
+    <b>for</b> k:=1 <b>to</b> Lc <b>do</b> SD.S^[k]:=Sc[k]; <FONT COLOR=GREEN>//копируем в буфер</FONT>
+    SD.L:=Lc;          <FONT COLOR=GREEN>//устанавливаем длину динамической строки</FONT>
+   <b>end</b>;
+<b>End</b>;
+
+<FONT COLOR=GREEN>     // == прочитать первые 255 символов строки</FONT>
+<b>function</b> SDGetStr(<b>var</b> SD: TDString): string;
+<b>var</b> Lc,k : byte;  
+<b>Begin</b>
+  Result:=''; 
+  <b>if</b> SD.S=<b>Nil then</b> Exit;
+  <b>if</b> SD.L<=255 <b>then</b> Lc:=SD.L <b>else</b> Lc:=255;
+  <b>for</b> k:=1 <b>to</b> Lc <b>do</b> Result:=Result+SD.S^[k];
+<b>End</b>;
+</FONT></PRE>
+
+Поместите приведенные процедуры в модуль DStringLib.</P>
+
+<img SRC="../../PIC/zadan.gif" ALIGN=LEFT>
+ <FONT SIZE=6><u><i>Задания для самостоятельного выполнения</i></u></FONT>
+
+<P><i><b>Задание 1. Использование динамической строки символов</b></i>.<br>
+Используя динамическую строку символов, опишите массив из 100 динамических
+строк<br>
+<FONT NAME=Courier New COLOR=BLUE>
+<b>type</b> TArrayString = array [1..100] of TDString;</FONT><br>
+Разработайте программу, позволяющую прочитать произвольный текстовый
+файл в массив динамических строк. Операции с текстовым файлом можно
+посмотреть в <a href="up_text.htm">упражнении 10</a>.<br>
+<U>Пояснения к выполнению:</U>
+<OL>
+ <LI>Массив динамических строк следует описать в разделе <i>Public 
+     declarations</i> формы<br>
+     <FONT NAME=Courier New COLOR=BLUE>
+     SD : TArrayString;</FONT>
+ <LI>Выделить память можно сразу под все 100 динамических строк<br>
+     <FONT NAME=Courier New COLOR=BLUE>
+     <b>for</b> k:=1 to 100 do SDCreate(SD[k]);</FONT><br>
+     поместив данный код в обработчик <i>OnCreate</i> формы.
+ <LI>Код освобождения памяти массива динамических строк лучше поместить 
+     в обработчик события <i>OnDestroy</i> формы<br>
+     <FONT NAME=Courier New COLOR=BLUE>
+     <b>for</b> k:=1 to 100 do SDFree(SD[k]);</FONT>
+ <LI>При чтении файла каждую новую строку следует читать в переменную
+     типа <i>string</i> и с помощью процедуры <i>SDSetStr</i> заносить
+     ее в соответствующий элемент массива динамических строк.
+</OL>
+С использованием полученного массива динамических строк подсчитать:
+<OL>
+ <LI>число строк в тексте;
+ <LI>число слов в тексте;
+ <LI>число символов в тексте (отличных от пробела);
+ <LI>контрольную сумму файла (сумму кодов всех символов текста, 
+     включая пробелы);
+</OL>
+
+<P><i><b>Задание 2. Динамический массив динамических строк</b></i>.<br>
+Массив динамических строк, использованный в задании 1, имел фиксированный
+размер в 100 строк. Это существенно ограничивало его применение только для 
+файлов в 100 и менее строк. Разработать программу чтения файлов в динамический 
+массив динамических строк.<br> Для этого в интерфейсную секцию модуля <b>DStringLib</b>
+после раздел описания типов добавить: 
+<PRE><FONT NAME=Courier New COLOR=BLUE>
+<b>const</b>
+ DStrMax  = 65535;   <FONT COLOR=GREEN>//Максимальное число строк в тексте</FONT>
+<b>type</b> а
+ TArrayDString = array [1..DStrMax] of TDString;   
+ TArrayDStringPtr = ^TArrayDString; 
+ TADString = <b>record</b>
+   N : word;             <FONT COLOR=GREEN>//текущее число строк от 0 до 65535</FONT>
+   A : TArrayDStringPtr; <FONT COLOR=GREEN>//указатель на буфер строки</FONT>
+<b>end</b>;</FONT></PRE>
+
+<U>Пояснения к выполнению:</U>
+<OL>
+ <LI>Массив динамических строк следует описать в разделе <i>Public declarations</i> формы<br>
+     <FONT NAME=Courier New COLOR=BLUE>
+     SD : TADString;</FONT>
+ <LI>В отклике на событие <i>OnCreate</i> формы следует инициализировать
+     пустой массив динамических строк<br>
+     <FONT NAME=Courier New COLOR=BLUE>
+     SD.N:=0;<br>
+     SD.A:=<b>Nil</b>;</FONT>
+ <LI>При чтении нового файла следует 
+     <UL>
+      <LI>поместить на форму компонент <b>OpenDialog</b>;
+      <LI>поместить на форму кнопку <b>SpeedButton</b> и в событие по ее нажатие поместить
+      <LI>освободить память из под всех строк и из под всего старого массива<br>
+          <FONT NAME=Courier New COLOR=BLUE>
+          <b>if</b> SD.A<>Nil <b>then<br>
+          begin<br>
+           for</b> k:=1 <b>to</b> SD.N <b>do</b> SDFree(SD.A^[k]);<br>
+           FreeMem(SD.A,SD.N*SizeOf(TDString));<br>
+           SD.N:=0;<br>
+          <b>end</b>;</FONT>
+      <LI>открыть и прочитать файл, сосчитать количество строк в нем<br>
+         <FONT NAME=Courier New COLOR=BLUE>
+          SD.N:=0;<br>
+          <b>while not</b> Eof(MF) <b>do<br>
+          begin</b><br>
+          ReadLn(MF);<br>
+          SD.N:=SD.N+1;<br>
+          <b>end</b>;<br>
+          CloseFile(MF);
+         </FONT>
+      <LI>выделить память под массив нужного размера и создать необходимое
+          число строк<br>
+         <FONT NAME=Courier New COLOR=BLUE>
+          GetMem(SD.A,SD.N*SizeOf(TDString));<br>
+          for</b> k:=1 <b>to</b> SD.N <b>do</b> SDCreate(SD.A^[k]);<br>
+         </FONT>
+      <LI>вторично открыть файл и прочитать строки в динамический массив.
+     </UL>
+ <LI>При закрытии программы следует освободить выделенную под массив память.
+</OL>
+С использованием полученного массива динамических строк подсчитать:
+<OL>
+ <LI>число строк в тексте;
+ <LI>число слов в тексте;
+ <LI>число символов в тексте (отличных от пробела);
+ <LI>контрольную сумму файла (сумму кодов всех символов текста, 
+     включая пробелы);
+</OL>
+Сравнить полученные результаты на одинаковых файлах с результами задания 2.</P>
+
+<i><b>Задание 3. Построение графиков функций</b></i>.<br>
+Разработать программу анализа аналитической функции со следующими 
+возможностями
+<UL>
+  <LI>позволяющую задать область определения (Xmin,Xmax);
+  <LI>позволяющую задать число табличных точек (NT);
+  <LI>позволяющую выбрать аналитическую функцию из заданного списка (не менее 10 функций);
+  <LI>вычисляющую таблицу значений аргумента X и таблицу значений функции Y;
+  <LI>записывающую число табличных точек, таблицу аргумента и функции в текстовый файл в формате:<br>
+      СТРОКА 1: число табличных точек<br>
+      СТРОКА 2: X<SUB>1</SUB> Y<SUB>1</SUB><br>
+      СТРОКА 3: X<SUB>2</SUB> Y<SUB>2</SUB><br>
+      . . .<br>
+      СТРОКА NT+1: X<SUB>NT</SUB> Y<SUB>NT</SUB>
+  <LI>считывающую табулированную функцию из файла по оговоренному выше формату;
+  <LI>строящую график табулированной функции.
+</UL>
+<FONT COLOR=RED><U>НЕОБХОДИМОЕ ТРЕБОВАНИЕ:</U><br>
+<i>память под массивы таблиц аргумента и функции должна выделяться динамически.</i></font>
+
+<hr><a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</HTML>

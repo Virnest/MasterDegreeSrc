@@ -1,0 +1,109 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 15. Моделирование броуновского движения частиц</FONT>
+<hr>
+
+<p>Требуется разработать модель броуновского движения N частиц в квадратной области
+с размером стороны в <i>а</i> единиц. Частицы считать абсолютно твердыми телами 
+круглой формы с радиусом <i>r</i> единиц. Начальные значения координат и скоростей
+частиц являются случайными и соответствуют равномерному закону распределению. 
+Координаты центров частиц лежат в интервале от <i>r</i> до <i>a-r</i>.
+Компоненты вектора начальной скорости распределены в интервале от <i>-V<sub>0</sub></i> 
+до <i>V<sub>0</sub></i>. В исходном состоянии частицы не перекрываются и
+не пересекаются со стенками области. Столкновения частиц между собой и со стенками 
+области считать абсолютно упругими.</p>
+<u>Исходные данные:</u><br>
+Размер области <i>a</i> = 100;<br>
+Радиус частицы <i>r</i> = 2;<br>
+Число частиц N = 40;<br>
+Граница интервала по начальной скорости <i>V<sub>0</sub></i> = 5. 
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="Broun.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<h2>Пояснения к алгоритму</h2>
+
+<b><u>Алгоритм имитации броуновского движения может включать следующие шаги:</b></u>
+<PRE><FONT COLOR=BLUE>
+  1. <i>Заполнить область частицами со случайными параметрами</i>
+  2. <i>Установить начальные значения времени <b>t</b> процесса 
+     и шага по времени <b>dt</b> (Например: <b>t</b>=0; <b>dt</b>=0.08)</i>
+  3. <i>Организовать цикл по времени для имитации движения</i>
+     isStop:=False
+     <b>while</b> ( isStop=False )
+        t:=t+dt
+        <b>for</b> k=1 <b>to</b> N <b>step</b> 1
+         <i>вычисление приращения координат k-ого шара: <b>dx,dy</b></i>
+         <FONT COLOR=GREEN><i>проверка столкновений:</i></FONT>
+            Ok:=True
+            <b>while</b> <i>(Ok=True)</i>
+              Ok:=False
+              <b>if</b> <i>есть столкновение с шарами</i>
+                <b>then</b> 
+                  <i>корректировка</i> <b>dx,dy,Vx,Vy</b> 
+                  Ok:=False
+              <b>end if</b>
+              <b>if</b> <i>есть столкновение со стенкой</i>
+                <b>then</b> 
+                  <i>корректировка</i> <b>dx,dy,Vx,Vy</b> 
+                  Ok:=True
+              <b>end if</b>
+            <b>end while</b>
+         <i>стирание k-ого шарика</i>
+         <i>установка новых значений координат k-ого шарика</i>
+         <i>рисование k-ого шарика в новом положении</i>
+        <b>next k</b>
+        <FONT COLOR=GREEN><i>проверка остановки счета</i></FONT> 
+     <b>end while</b>
+</FONT></PRE> 
+
+<b><u>Генерация начального распределения шаров</b></u>
+<PRE><FONT COLOR=BLUE>
+  <b>for</b> k=1 <b>to</b> N <b>step</b> 1
+    Ok:=True
+    <b>while</b> (Ok=True)
+      <FONT COLOR=GREEN><i>определение случайных координат k-ого шара:</i></FONT> 
+       x:=2*r+<b>Random</b>*(a-4*r)
+       y:=2*r+<b>Random</b>*(a-4*r)
+      <FONT COLOR=GREEN><i>проверка на пересечение с ранее сгенерированными шара:</i></FONT> 
+       Ok:=True
+       <b>for</b> j=1 <b>to</b> k-1 <b>step</b> 1
+        <b>if</b> <i>есть пересечение j-ого и k-ого шаров</i>
+           <b>then</b> Ok:=False
+       <b>next j</b>
+    <b>end while</b>
+  <b>next k</b>
+</FONT></PRE> 
+
+<b><u>Вариант описания объекта "Шар"</b></u>
+<PRE><FONT COLOR=BLUE>
+  <FONT COLOR=GREEN><i>ЗАЩИЩЕННЫЕ ПОЛЯ И МЕТОДЫ:</i></FONT> 
+    Fr : Extended              <FONT COLOR=GREEN><i>радиус шара</i></FONT>
+         <FONT COLOR=GREEN><i>нарисовать шар (виртуальный метод, переопределяемый у потомков):</i></FONT>
+    <b>procedure</b> PutObject(CL: TColor; W: TWindowXY); <b>virtual</b>;
+  <FONT COLOR=GREEN><i>ОТКРЫТЫЕ ПОЛЯ И МЕТОДЫ:</i></FONT> 
+   Color,ColorHide : TColor    <FONT COLOR=GREEN><i>цвет</i></FONT> 
+   x,y : Extended              <FONT COLOR=GREEN><i>координаты центра</i></FONT> 
+   Vx,Vy : Extended            <FONT COLOR=GREEN><i>скорость центра</i></FONT>
+   <b>constructor</b> Create
+        <FONT COLOR=GREEN><i>расстояние от (x,y) до центра шара А:</i></FONT>
+   <b>function</b> GetDR(A): Extended
+        <FONT COLOR=GREEN><i>проверка столкновения с шаром А:</i></FONT>
+   <b>function</b> GetBum(A): Boolean 
+   <b>procedure</b> Show(W: TWindowXY) <FONT COLOR=GREEN><i>нарисовать шар</i></FONT>
+   <b>procedure</b> Hide(W: TWindowXY) <FONT COLOR=GREEN><i>стереть шар</i></FONT>
+        <FONT COLOR=GREEN><i>переместить центр шара на dx,dy:</i></FONT>
+   <b>procedure</b> Move(dx,dy: Extended; W: TWindowXY) 
+   <b>property</b> R: Extended <b>read</b> Fr  <FONT COLOR=GREEN><i>радиус шара:</i></FONT>
+</FONT></PRE> 
+
+<a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</HTML>

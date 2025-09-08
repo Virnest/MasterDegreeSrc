@@ -1,0 +1,539 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 11. Масштабируемое окно</FONT>
+<hr>
+
+<P>При отображении объектов на экране или на листе 
+бумаги с помощью принтера необходимо знать координаты точек объектов. 
+Рассмотрим две системы координат. Первая - <i>мировые координаты</i> (<i>координаты объекта</i>), которые описывают 
+истинное положение объектов в пространстве с заданной точностью. Другая - 
+<i>система координат устройства</i> изображения (<i>координаты изображения</i>), в котором осуществляется вывод 
+изображения объектов в заданной проекции.<br>
+<IMG SRC="up_wxy1.gif"><br>
+Пусть в мировой системе координат <i>xy</i> описано
+плоское тело <i>Q</i>. Требуется построить изображение данного тела на некотором
+устройстве вывода в системе координат <i>XY</i> данного устройства. Для 
+отображения тела на устройстве вывода необходимо установить соответствие
+между координатами точек тела в мировой системе и в системе координат устройства
+<TABLE WIDTH=500>
+ <TR><TD WIDTH=80%>(<i>X,Y</i>) = <i>G</i>(<i>x,y</i>).</TD><TD>(1)</TD></TR>
+</TABLE>
+В данном случае <i>G</i> можно рассматривать как некоторый оператор, позволяющий
+по мировым координатам точки определить ее координаты на устройстве вывода.</P>
+
+<P>Мировая система координат (система координат объекта) имеет следующие особенности:
+<UL>
+ <LI>значения координат принадлежат множеству вещественных чисел;
+ <LI>интервал изменения координат составляет от -<FONT FACE="Symbol">&#165</FONT> до +<FONT FACE="Symbol">&#165</FONT> (например, при отображении функции <i>tg x</i>).
+</UL>
+Система координат устройства (система координат изображения) также имеет особенности:
+<UL>
+ <LI>значения координат принадлежат множеству целых чисел, т.к. практически все современные устройства вывода являются растровыми;
+ <LI>интервал изменения координат ограничен от 0 до N<sub>max</sub> и зависит от режима работы устройства;
+ <LI>ось ординат устройства перевернута вниз, т.к. соответствует номеру строки растра, увеличивающегося сверху вниз.
+</UL>
+При установлении соответствия между системами координат необходимо учитывать 
+перечисленные особенности.</P>
+
+<P>На устройстве вывода изображение должно занимать некоторую прямоугольную 
+область (окно вывода), заданную координатами (<i>X<sub>a</sub>,Y<sub>a</sub></i>)-(<i>X<sub>b</sub>,Y<sub>b</sub></i>).
+Поставим ей в соответствие в мировой системе координат прямоугольную область
+(<i>X<sub>min</sub>,Y<sub>min</sub></i>)-(<i>X<sub>max</sub>,Y<sub>max</sub></i>). 
+Тогда между мировыми координатами любой точки <i>p(x,y)</i> тела и координатами
+образа этой точки <i>P(X,Y)</i> на устройстве можно записать следующие
+соотношения:
+<TABLE WIDTH=500>
+ <TR><TD WIDTH=80%><IMG SRC="up_wxy2.gif"></TD><TD>(2)</TD></TR>
+</TABLE></P>
+или
+<TABLE WIDTH=500>
+ <TR><TD WIDTH=80%><IMG SRC="up_wxy3.gif"></TD><TD>(3)</TD></TR>
+</TABLE></P>
+где <i>K<sub>x</sub></i> и <i>K<sub>y</sub></i> - масштабные коэффициенты по осям 
+координат. Функции (3) определяют вид оператора <i>G</i> из соотношения (1).<br>
+Из соотношений (2) легко могут быть установлены выражения для определения
+мировых координат по координатам устройства
+<TABLE WIDTH=500>
+ <TR><TD WIDTH=80%><IMG SRC="up_wxy4.gif"></TD><TD>(4)</TD></TR>
+</TABLE></P>
+
+<img SRC="../../PIC/zadan.gif" ALIGN=LEFT>
+ <FONT SIZE=6><u><i>Задания для самостоятельного выполнения</i></u></FONT>
+
+
+<P><i><b>Задание 1</b></i>. Разработаем библиотечный модуль <i>WindowLib</i>, содержащий структуру 
+данных и процедуры для выполнения преобразований из мировой системы координат
+в систему координат устройства. Будем называть подобную структуру данных
+(т.е. собственно данные и связанные с их обработкой процедуры и функции)
+<i>масштабируемым окном</i>.</P>
+
+Параметры масштабируемого окна объединим в следующей записи:
+<PRE><FONT COLOR=BLUE>
+<b>type</b>
+    TWindowXY = <b>record</b>
+      CNV : TCanvas;                <FONT COLOR=GREEN>// канва для вывода изображения</FONT>
+      Xa,Ya,Xb,Yb : integer;        <FONT COLOR=GREEN>// окно в системе координат устройства</FONT>
+      Xmin,Ymin,Xmax,Ymax : single; <FONT COLOR=GREEN>// окно в мировой системе координат</FONT>
+      Kx,Ky : single;               <FONT COLOR=GREEN>// масштабные коэффициенты</FONT>
+    <b>end</b>;
+</FONT></PRE> 
+Систему координат изображения свяжем с компонентом, имеющим <i>Canvas</i>
+(например, <i>PaintBox</i>). Для организации этой связи включим в состав
+записи <i>TWindowXY</i> поле <i>CNV</i> типа <i>TCanvas</i>.<br>
+Введем две процедуры для инициализации параметров окна.
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=GREEN>// настройка параметров окна в мировой системе координат</FONT>
+<b>procedure</b> SetScale(Xminc,Yminc,Xmaxc,Ymaxc: single; var W: TWindowXY);
+<b>var</b> v : single;
+<b>Begin</b>
+ <FONT COLOR=GREEN>// проверка Xminc и Xmaxc</FONT>
+ <b>if</b> Xminc>Xmaxc <b>then</b>   <FONT COLOR=GREEN>// если Xminc > Xmaxc, то меняем местами </FONT>
+  <b>begin</b> v:=Xminc; 
+    Xminc:=Xmaxc;   Xmaxc:=v;
+  <b>end</b>;
+ <b>if</b> Xmaxc-Xminc<1.0e-20 <b>then</b> <FONT COLOR=GREEN>// если Xminc = Xmaxc </FONT>
+  <b>begin</b>
+    Xminc:=Xminc-0.5;
+    Xmaxc:=Xmaxc+0.5;
+  <b>end</b>;
+ <FONT COLOR=GREEN>// проверка Yminc и Ymaxc</FONT>
+ <b>if</b> Yminc>Ymaxc <b>then</b>   <FONT COLOR=GREEN>// если Yminc > Ymaxc, то меняем местами </FONT>
+  <b>begin</b> v:=Yminc; 
+    Yminc:=Ymaxc;   Ymaxc:=v;
+  <b>end</b>;
+ <b>if</b> Ymaxc-Yminc<1.0e-20 <b>then</b> <FONT COLOR=GREEN>// если Yminc = Ymaxc </FONT>
+  <b>begin</b>
+    Yminc:=Yminc-0.5;
+    Ymaxc:=Ymaxc+0.5;
+  <b>end</b>;
+ <b>with</b> W <b>do</b>
+  <b>begin</b>
+      Xmin:=Xminc;  Xmax:=Xmaxc;
+      Ymin:=Yminc;  Ymax:=Ymaxc;
+      Kx:=(Xb-Xa)/(Xmax-Xmin);  <FONT COLOR=GREEN>// вычисление масштабных коэффициентов</FONT>
+      Ky:=(Yb-Ya)/(Ymax-Ymin);
+  <b>end</b>;
+<b>End</b>;
+</FONT></PRE> 
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=GREEN>// настройка параметров окна в системе координат устрйства</FONT>
+<b>procedure</b> InitWXY(CNVc: TCanvas; Width,Height: integer; var W: TWindowXY);
+<b>Begin</b>
+ <b>with</b> W <b>do</b>
+  <b>begin</b>
+      CNV:=CNVc;
+      Xa:=0;  Xb:=Width;
+      Ya:=0;  Yb:=Height;
+  <b>end</b>;
+ SetScale(0,0,1,1,W);
+<b>End</b>;
+</FONT></PRE> 
+
+Для преобразования координат введем две функции:
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=GREEN>// определение координаты Х</FONT>
+<b>function</b> GetX(x: single; var W: TWindowXY): integer;
+<b>Begin</b>
+ <b>with</b> W <b>do Result</b>:=Xa+Round(Kx*(x-Xmin))
+<b>End</b>;
+</FONT></PRE> 
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=GREEN>// определение координаты Y</FONT>
+<b>function</b> GetY(y: single; var W: TWindowXY): integer;
+<b>Begin</b>
+ <b>with</b> W <b>do Result</b>:=Yb-Round(Ky*(y-Ymin))
+<b>End</b>;
+</FONT></PRE> 
+Процедура рисования отрезка линии сейчас может быть записана следующим образом:
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=GREEN>// рисование отрезка АВ линии шириной WL и цветом CL</FONT>
+<b>procedure</b> PutLine(Xa,Ya,Xb,Yb: single; WL: word; CL: TColor; var W: TWindowXY);
+<b>Begin</b>
+  <b>with</b> W.CNV <b>do 
+    begin</b> 
+     Pen.Width:=WL; <FONT COLOR=GREEN>// устанавливаем ширину линии</FONT>
+     Pen.Color:=CL; <FONT COLOR=GREEN>// устанавливаем цвет линии</FONT>
+     MoveTo(GetX(Xa,W),GetY(Ya,W)); <FONT COLOR=GREEN>// устанавливаем перо</FONT>
+     LineTo(GetX(Xb,W),GetY(Yb,W)); <FONT COLOR=GREEN>// рисуем линию</FONT>
+    <b>end</b>;
+<b>End</b>;
+</FONT></PRE> 
+Секция связи модуля <i>WindowLib</i> может выглядеть следующим образом:
+<PRE><FONT COLOR=BLUE>
+<FONT COLOR=GREEN>// масштабируемое окно</FONT>
+<b>unit</b> WindowLib;
+
+<FONT COLOR=GREEN>{ ########## }</FONT><b>interface</b><FONT COLOR=GREEN>{ ########## }</FONT>
+
+<b>uses</b> Graphics;
+
+<b>type</b>
+    TWindowXY = <b>record</b>
+      CNV : TCanvas;                <FONT COLOR=GREEN>// канва для вывода изображения</FONT>
+      Xa,Ya,Xb,Yb : integer;        <FONT COLOR=GREEN>// окно в системе координат устройства</FONT>
+      Xmin,Ymin,Xmax,Ymax : single; <FONT COLOR=GREEN>// окно в мировой системе координат</FONT>
+      Kx,Ky : single;               <FONT COLOR=GREEN>// масштабные коэффициенты</FONT>
+    <b>end</b>;
+
+<FONT COLOR=GREEN>// настройка параметров окна в мировой системе координат</FONT>
+<b>procedure</b> SetScale(Xminc,Yminc,Xmaxc,Ymaxc: single; var W: TWindowXY);
+<FONT COLOR=GREEN>// настройка параметров окна в системе координат устрйства</FONT>
+<b>procedure</b> InitWXY(CNVc: TCanvas; Width,Height: integer; var W: TWindowXY);
+<FONT COLOR=GREEN>// определение координаты Х</FONT>
+<b>function</b> GetX(x: single; var W: TWindowXY): integer;
+<FONT COLOR=GREEN>// определение координаты Y</FONT>
+<b>function</b> GetY(y: single; var W: TWindowXY): integer;
+<FONT COLOR=GREEN>// рисование отрезка АВ линии шириной WL и цветом CL</FONT>
+<b>procedure</b> PutLine(Xa,Ya,Xb,Yb: single; WL: word; CL: TColor; var W: TWindowXY);
+</FONT></PRE> 
+
+<P>Создайте новый модуль (см. <a href="../upr_04/up_unit.htm">упражнение 4</a>), поместите 
+туда рассмотренные выше типы данных, процедуры и функции и запишите в файл
+<i>WindowLib.pas</i>.</P>
+
+<P>Как использовать процедуры и функции модуля <i>WindowLib</i>? Для примера построим 
+график функции <b>y=sin(x)</b>. Выполните следующие действия:<br>
+<a name="uses"> </a>
+<OL>
+  <LI>Начните новый проект. Пустой форме присвойте имя <i>fmGraphic</i>.
+      Сохраните проект под названием <i>Graphic</i>, присвоив файлу модуля
+      формы имя <i>unGraphic</i>.
+  <LI>Свойству <i>Caption</i> формы присвойте значение <i>График функции y=sin(x)</i>.<br>
+      Свойству <i>Position</i> формы присвойте значение <i>psScreenCenter</i> - расположить в центре экрана.
+  <LI>В предложение <i>uses</i> модуля <i>unGraphic</i> формы включите вызов модуля <i>WindowLib</i>
+      <PRE><FONT COLOR=BLUE>
+      <B>uses</B>
+         Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+         WindowLib;
+      </FONT></PRE> 
+  <LI>В раздел <i>public</i> формы включите описание масштабируемого окна
+      <PRE><FONT COLOR=BLUE>
+      TForm1 = <b>class</b>(TForm)
+       <b>private</b> 
+          <FONT COLOR=GREEN>{ Private declarations }</FONT>
+       <b>public</b> 
+          <FONT COLOR=GREEN>{ Public declarations }</FONT>
+            W : TWindowXY;   <FONT COLOR=GREEN>// масштабируемое окно</FONT>
+       <b>end</b>;
+      </FONT></PRE> 
+  <LI>Поместите на форму компонент <b>Panel</b>, удалите у нее значение поля <b>Caption</b>,
+      а полю <b>Align</b> значение <i>alClient</i> - заполнение всей формы.
+  <LI>На компонент <i>Panel1</i> поместите компонент <b>PaintBox</b> со странички <b>System</b> в Delphi или <b>Additional</b> в Lazarus.
+      Его полю <b>Name</b> присвойте значение <i>PB</i>, а полю <b>Align</b> опять 
+      значение <i>alClient</i>.
+  <LI>Создайте обработчик события <i>onCreate</i> формы <i>fmGraphic</i> и поместите в него
+      следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TForm1.FormCreate(Sender: TObject);
+      <b>begin</b>
+        InitWXY(PB.Canvas,PB.Width,PB.Height,W); <FONT COLOR=GREEN>//инициализируем окно W</FONT>
+        SetScale(0,-1.1,2*Pi,1.1,W); <FONT COLOR=GREEN>//устанавливаем масштаб окна W</FONT>
+      <b>end</b>;
+      </FONT></PRE> 
+      Событие <i>onCreate</i> вызывается при создании формы. В этом случае обработчик настраивает масштабируемое окно,
+      определяя все его поля и вычисляя масштабные коэффициенты.
+  <LI>Создайте обработчик события <i>onPaint</i> компонента <i>PB</i> и поместите в него
+      следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TForm1.PBPaint(Sender: TObject);
+      <b>var</b> x1,x2 : single;   k : word;
+      <b>begin</b>
+        PutLine(W.Xmin,0,W.Xmax,0,1,clSilver,W); <FONT COLOR=GREEN>//рисуем ось Х</FONT>
+        for k:=1 to 360 do <FONT COLOR=GREEN>//рисуем график отрезками через 1 градус</FONT>
+         begin
+          x1:=(k-1)*Pi/180;
+          x2:=k*Pi/180;
+          PutLine(x1,sin(x1),x2,sin(x2),3,clGreen,W);
+         end;
+      <b>end</b>;
+      </FONT></PRE> 
+  <LI>Откомпилируйте программу и убедитесь в ее правильной работе. Нажмите кнопку максимизации 
+      размеров окна (расположена в верхнем правом углу окна). Можно отметить,
+      что при изменении размеров окна сам график не изменяет размеров. Устраним этот
+      недостаток.
+  <LI>Создайте обработчик события <i>onResize</i> формы <i>fmGraphic</i> и поместите в него
+      следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TForm1.FormResize(Sender: TObject);
+      <b>begin</b>
+        W.Xb:=PB.Width;  <FONT COLOR=GREEN>//изменяем параметры системы координат устройства</FONT>
+        W.Yb:=PB.Height;
+        SetScale(W.Xmin,W.Ymin,W.Xmax,W.Ymax,W); <FONT COLOR=GREEN>//вычисляем масштабные к-ты</FONT>
+      <b>end</b>;
+      </FONT></PRE> 
+      По сути данный обработчик перенастраивает масштабируемое окно на новые размеры окна.
+      Запустите программу и убедитесь, что сейчас график масштабируется при изменении размеров окна. 
+</OL>
+
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="Graphic.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<P><IMG SRC="up_p00.gif" align=right>
+<i><b>Задание 2</b></i>. Разработаем программу, позволяющую выполнять чертеж
+плоской фигуры, изображенной на рисунке. При этом программа должна позволять 
+увеличивать и уменьшать изображение фигуры.</P>
+Выполните следующие действия:<br>
+<OL>
+  <LI>Начните новый проект. Пустой форме присвойте имя <i>fmFigure</i>.
+      Сохраните проект под названием <i>Figure</i>, присвоив файлу модуля
+      формы имя <i>unFigure</i>.
+  <LI>Свойству <i>Caption</i> формы присвойте значение <i>Чертеж плоской фигуры</i>.<br>
+      Свойству <i>Position</i> формы присвойте значение <i>psScreenCenter</i> - расположить в центре экрана.
+      Свойству <i>Height</i> - 319, <i>Width</i> - 360.
+  <LI>В предложение <i>uses</i> модуля <i>unGraphic</i> формы включите вызов модуля <i>WindowLib</i>,
+      а в раздел <i>public</i> формы включите описание переменной для масштабируемого окна
+      (см. <a href="#uses">Задание 1</a>)
+  <LI>Поместите на форму компонент <b>Panel</b>, удалите у нее значение поля <b>Caption</b>,
+      а полю <b>Align</b> присвойте значение <i>alTop</i> - верхнее выравнивание. Полю <b>Height</b>
+      присвойте значение 33.
+  <LI>Поместите на компонент <i>Panel1</i> еще одну <b>Panel</b>, удалите у нее значение поля <b>Caption</b>,
+      остальным полям присвойте следующие значения
+      <PRE><FONT COLOR=BLUE>
+       <b>BevelInner</b> = bvRaised     
+       <b>BevelOuter</b> = bvLowered	
+       <b>Height</b> = 25     <b>Width</b> = 101	
+       <b>Left</b> = 4        <b>Top</b> = 4       <b>Name</b> = "XY"     
+      </FONT></PRE>
+  <LI>Поместите на форму еще один компонент <b>Panel</b>, удалите у этой панели значение поля <b>Caption</b>,
+      а полю <b>Align</b> присвойте значение <i>alClient</i>.
+  <LI>На только что размещенный компонент <i>Panel2</i> поместите компонент <b>PaintBox</b> со 
+      странички <b>System</b> в Delphi или <b>Additional</b> в Lazarus. 
+      Его полю <b>Name</b> присвойте значение <i>PB</i>, а полю <b>Align</b> 
+      опять значение <i>alClient</i>.
+  <LI>Создайте обработчик события <i>onCreate</i> формы <i>fmFigure</i> и поместите в него
+      следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TfmFigure.FormCreate(Sender: TObject);
+      <b>begin</b>
+        InitWXY(PB.Canvas,PB.Width,PB.Height,W); <FONT COLOR=GREEN>//инициализируем окно W</FONT>
+        SetScale(-25,-25,45,25,W); <FONT COLOR=GREEN>//устанавливаем масштаб окна W</FONT>
+      <b>end</b>;
+      </FONT></PRE> 
+      Размеры окна в мировой системе координат установлены исходя из габаритных размеров отображаемой фигуры.
+  <LI>Чертеж фигуры образован линиями контура и заполненной штриховкой или сплошным
+      цветом внутренней области фигуры. Контур образован дугами окружности и отрезками прямых линий.
+      Дополним модуль <i>WindowLib</i> процедурой для рисования дуги окружности, заданной
+      в мировой системе координат
+      <PRE><FONT COLOR=GREEN>
+      // рисование дуги окружности шириной WL и цветом CL
+      //  Xo,Yo - координаты центра;  R - радиус;
+      //  FiA,FiB - углы в градусах между осью Х и лучами из центра дуги, проходящими 
+      //  через начальную (А) и конечную (В) точки дуги. 
+      //  Обход от А к В выполняется против часовой стрелки.</FONT><FONT COLOR=BLUE>
+      <b>procedure</b> PutArc(Xo,Yo,R,FiA,FiB: single; WL: word; CL: TColor; <b>var</b> W: TWindowXY);
+      <b>var</b> x1,y1,x2,y2,x3,y3,x4,y4 : integer;
+      <b>Begin</b>
+        x1:=GetX(Xo-R,W);  y1:=GetY(Yo+R,W);
+        x2:=GetX(Xo+R,W);  y2:=GetY(Yo-R,W);
+        x3:=GetX(Xo+R*cos(FiA*Pi/180),W);
+        y3:=GetY(Yo+R*sin(FiA*Pi/180),W);
+        x4:=GetX(Xo+R*cos(FiB*Pi/180),W);
+        y4:=GetY(Yo+R*sin(FiB*Pi/180),W);
+        <b>with</b> W.CNV <b>do
+         begin</b>
+          Pen.Width:=WL;
+          Pen.Color:=CL;
+          Arc(x1,y1,x2,y2,x3,y3,x4,y4);
+         <b>end;
+      End;</b>
+      </FONT></PRE> 
+      Поместите текст данной процедуры в секцию реализации модуля <i>WindowLib</i>, а заголовок
+      данной процедуры - в секцию связи этого модуля. 
+  <LI>Создайте обработчик события <i>onPaint</i> компонента <i>PB</i> и поместите в него
+      следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TfmFigure.PBPaint(Sender: TObject);
+      <b>var</b> x,y : integer;
+      <b>begin
+        with</b> W.CNV <b>do  <FONT COLOR=GREEN>// закрашиваем PB белым цветом </FONT>
+         begin</b> Brush.Style:=bsSolid;
+               Brush.Color:=clWhite;
+               Rectangle(0,0,PB.Width,PB.Height);
+         <b>end</b>;
+        PutLine(-25,0,45,0,1,clSilver,W); <FONT COLOR=GREEN>// ось Х </FONT>
+        PutLine(0,-25,0,25,1,clSilver,W); <FONT COLOR=GREEN>// ось У </FONT>
+         PutArc(0,0,20,90,271,1,clBlack,W);
+         PutArc(0,0,16,90,271,1,clBlack,W);
+         PutLine(0,20,0,16,1,clBlack,W);
+         PutLine(0,-20,40,-20,1,clBlack,W);
+         PutLine(0,-16,40,-16,1,clBlack,W);
+         PutLine(40,-20,40,-16,1,clBlack,W);
+         <b>with</b> W.CNV <b>do</b>  <FONT COLOR=GREEN>// закрашиваем внутреннюю область фигуры </FONT>
+          <b>begin</b>
+           Brush.Style:= bsBDiagonal;
+           Brush.Color:= clBlack;
+           x:=GetX(18*cos(3*Pi/4),W); <FONT COLOR=GREEN>// координаты точки начала закраски </FONT>
+           y:=GetY(18*sin(3*Pi/4),W);
+           FloodFill(x,y,clBlack,fsBorder);
+          <b>end;
+      end</b>;
+      </FONT></PRE> 
+      Откомпилируйте программу и убедитесь в ее правильной работе.
+  <LI>Добавте к программе возможность видеть значения мировых координат точки над которой
+      находится в данный момент курсор. Текущие координаты будем отображать на панельке <b>XY</b>.<br>
+      Добавте в модуль <i>WindowLib</i> следующие две функции:
+      <PRE><FONT COLOR=BLUE>  
+      <FONT COLOR=GREEN>// определение мировой координаты по координате Х устройства</FONT>
+      <b>function</b> GetWX(x: integer; <b>var</b> W: TWindowXY): single;
+      <b>Begin
+        with</b> W <b>do</b> Result:=Xmin+(x-Xa)/Kx
+      <b>End</b>;
+      <FONT COLOR=GREEN>// определение мировой координаты по координате У устройства</FONT>
+      <b>function</b> GetWY(y: integer; <b>var</b> W: TWindowXY): single;
+      <b>Begin
+        with</b> W <b>do</b> Result:=Ymax-(y-Ya)/Ky
+      <b>End</b>;
+      </FONT></PRE> 
+      Не забудьте в секцию связи модуля добавить заголовки данных функций.<br>
+      Создайте обработчик события <i>onMouseMove</i> компонента <i>PB</i> и поместите в него
+      следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TfmFigure.PBMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
+      <b>var</b> xk,yk : single;
+      <b>begin</b>
+         xk:=GetWX(X,W);
+         yk:=GetWY(Y,W);
+         XY.Caption:=Format('X:%5.1f; Y:%5.1f',[xk,yk]);
+      <b>end</b>;
+      </FONT></PRE> 
+      Откомпилируйте программу и проверте правильность ее работы. На панельке <b>XY</b>
+      при перемещении курсора должны отображаться его текущие мировые координаты.
+  <LI>Добавте к программе возможность увеличивать или уменьшать изображение фигуры. Поместите
+      на <i>Panel1</i> две кнопки <b>SpeedButtom</b>. Полям <b>Name</b> присвойте значения
+      <i>SB_Plus</i> и <i>SB_Minus</i>, а полям <b>Caption</b> - "+" и "-" соответственно.<br>
+      Создайте обработчик события <b>onClick</b> кнопки <i>SB_Plus</i> и поместите в него следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TfmFigure.SB_PlusClick(Sender: TObject);
+      <b>var</b> dx,dy,dx1,dy1 : single;
+      <b>begin</b>
+         dx:=W.Xmax-W.Xmin;
+         dy:=W.Ymax-W.Ymin;
+         dx1:=dx/4;
+         dy1:=dx1*dy/dx;
+         SetScale(W.Xmin+dx1,W.Ymin+dy1,W.Xmax-dx1,W.Ymax-dy1,W);
+         PBPaint(Sender);  <FONT COLOR=GREEN>// перерисовываем чертеж </FONT>
+      <b>end</b>;
+      </FONT></PRE> 
+      Если Вы проанализируете код, то поймете, что масштаб рисунка увеличивается в 2 раза.<br>
+      Создайте аналогичный обработчик события <b>onClick</b> кнопки <i>SB_Minus</i>
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TfmFigure.SB_MinusClick(Sender: TObject);
+      <b>var</b> dx,dy,dx1,dy1 : single;
+      <b>begin</b>
+         dx:=W.Xmax-W.Xmin;
+         dy:=W.Ymax-W.Ymin;
+         dx1:=dx/4;
+         dy1:=dx1*dy/dx;
+         SetScale(W.Xmin-dx1,W.Ymin-dy1,W.Xmax+dx1,W.Ymax+dy1,W);
+         PBPaint(Sender);  <FONT COLOR=GREEN>// перерисовываем чертеж </FONT>
+      <b>end</b>;
+      </FONT></PRE> 
+      Приведенный код позволяет уменьшить масштаб в 2 раза.<br> 
+      Откомпилируйте программу и проверте ее работу. При изменении масштаба 
+      можно получить ситуацию, когда штриховка заполняет не только внутреннюю 
+      часть фигуры, но и всю форму. Это связано с появлением разрывов в контуре
+      фигуры и особенностями работы процедуры <b>FloodFill</b>, использованной
+      для заливки внутренней области фигуры. Более правильно вместо процедуры
+      <b>FloodFill</b> использовать <b>Polygon</b>. Однако в этом случае требуется
+      описать контур фигуры как многоугольник. 
+  <LI>При увеличении масштаба фигура становится не видна. Добавим возможность перемещать
+      отображаемое окно в мировой системе координат.<br>
+      Поместите на <i>Panel1</i> еще 4 кнопки <b>SpeedButtom</b>. Полям <b>Name</b> 
+      присвойте значения <i>SB_Left, SB_Right, SB_Up</i> и <i>SB_Down</i>, полям <b>Caption</b> 
+      присвойте значения "Left", "Right", "Up" и "Down" соответственно.<br> 
+      Создайте обработчик события <b>onClick</b> кнопки <i>SB_Left</i> и поместите в него следующий текст
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TfmFigure.SB_LeftClick(Sender: TObject);
+      <b>var</b> dx : single;
+      <b>begin</b>
+         dx:=(W.Xmax-W.Xmin)*0.1;
+         SetScale(W.Xmin+dx,W.Ymin,W.Xmax+dx,W.Ymax,W);
+         PBPaint(Sender);  <FONT COLOR=GREEN>// перерисовываем чертеж </FONT>
+      <b>end</b>;
+      </FONT></PRE> 
+      Создайте аналогичные обработчики события <b>onClick</b> для остальных кнопок
+      <PRE><FONT COLOR=BLUE>
+      <b>procedure</b> TfmFigure.SB_RightClick(Sender: TObject);
+      <b>var</b> dx : single;
+      <b>begin</b>
+         dx:=(W.Xmax-W.Xmin)*0.1;
+         SetScale(W.Xmin-dx,W.Ymin,W.Xmax-dx,W.Ymax,W);
+         PBPaint(Sender);  <FONT COLOR=GREEN>// перерисовываем чертеж </FONT>
+      <b>end</b>;
+      <b>procedure</b> TfmFigure.SB_UpClick(Sender: TObject);
+      <b>var</b> dy : single;
+      <b>begin</b>
+         dy:=(W.Ymax-W.Ymin)*0.1;
+         SetScale(W.Xmin,W.Ymin-dy,W.Xmax,W.Ymax-dy,W);
+         PBPaint(Sender);  <FONT COLOR=GREEN>// перерисовываем чертеж </FONT>
+      <b>end</b>;
+      <b>procedure</b> TfmFigure.SB_DownClick(Sender: TObject);
+      <b>var</b> dy : single;
+      <b>begin</b>
+         dy:=(W.Ymax-W.Ymin)*0.1;
+         SetScale(W.Xmin,W.Ymin+dy,W.Xmax,W.Ymax+dy,W);
+         PBPaint(Sender);  <FONT COLOR=GREEN>// перерисовываем чертеж </FONT>
+      <b>end</b>;
+      </FONT></PRE> 
+</OL>
+
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="Figure.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<P><i><b>Задание 3</b></i>. Разработать программу, позволяющую выполнять чертеж
+плоской фигуры, приведенной на рисунке соответствующего варианта. При этом программа 
+должна позволять выполнять все действия, описанные в задании 2.
+<TABLE>
+  <TR><TD>Вариант 1<br><IMG SRC="up_p01.gif"</TD>
+      <TD>Вариант 2<br><IMG SRC="up_p02.gif"</TD>
+      <TD>Вариант 3<br><IMG SRC="up_p03.gif"</TD>  
+  </TR>
+  <TR><TD>Вариант 4<br><IMG SRC="up_p04.gif"</TD>
+      <TD>Вариант 5<br><IMG SRC="up_p05.gif"</TD>
+      <TD>Вариант 6<br><IMG SRC="up_p06.gif"</TD>  
+  </TR>
+  <TR><TD>Вариант 7<br><IMG SRC="up_p07.gif"</TD>
+      <TD>Вариант 8<br><IMG SRC="up_p08.gif"</TD>
+      <TD>Вариант 9<br><IMG SRC="up_p09.gif"</TD>  
+  </TR>
+  <TR><TD>Вариант 10<br><IMG SRC="up_p10.gif"</TD>
+      <TD>Вариант 11<br><IMG SRC="up_p11.gif"</TD>
+      <TD>Вариант 12<br><IMG SRC="up_p12.gif"</TD>  
+  </TR>
+  <TR><TD>Вариант 13<br><IMG SRC="up_p13.gif"</TD>
+      <TD>Вариант 14<br><IMG SRC="up_p14.gif"</TD>
+      <TD>Вариант 15<br><IMG SRC="up_p15.gif"</TD>  
+  </TR>
+  <TR><TD>Вариант 16<br><IMG SRC="up_p16.gif"</TD>
+      <TD>Вариант 17<br><IMG SRC="up_p17.gif"</TD>
+  </TR>
+</TABLE>
+
+
+<P><i><b>Задание 4</b></i>. Разработать процедуру рисования дуги окружности с использованием 
+ломаной линии и включить эту процедуру в модуль <i>WindowLib</i>. Число звеньев ломаной
+должно выбираться автоматически в зависимости от радиуса дуги, но таким образом,
+чтобы полученая линия воспринималась на экране гладкой и не содержащей изломов. 
+Выполнить свой вариант из задания 3 с использованием разработанной процедуры, представив
+плоскую фигуру замкнутым многоугольником. Для заливки внутренней области фигуры
+использовать <i>Polygon</i>.
+
+<P><i><b>Задание 5</b></i>. Дополнить программу, разработанную в заданиях 2-4,
+кнопками вращения плоской фигуры относительно заданной точки. Координаты центра вращения
+задавать с помощью компонент <b>TEdit</b>.
+
+<hr>
+<a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</HTML>

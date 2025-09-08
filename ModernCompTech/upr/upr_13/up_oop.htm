@@ -1,0 +1,315 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 13. Объектно-ориентированное программирование</FONT>
+<hr>
+
+<i><b>Класс "Человечек"</b></i>.
+
+<P><IMG SRC="men.gif" align=left>
+Разработаем класс <i>Человечек</i>. Любой класс характеризуется
+набором атрибутов (поля и свойства) и набором методов (операций). Набор атрибутов определяет множество данных, 
+значениями которых один экземпляр класса отличается от другого. Набор методов реализует программный
+код класса. Назовем разрабатываемый класс <b>TMen</b> и он должен уметь нарисовать схематическую фигурку человечка 
+в прямоугольнике шириной <i>W</i> и высотой <i>H</i> цветом <i>Color</i>. Центр нижний границы прямоугольника,
+занимаемого человечком, имеет координаты <i>x</i> и <i>y</i>. На рисунке показаны 15 характерных точек фигурки, заданые
+относительно точки <i>x</i> и <i>y</i>.   
+Минимальный набор методов может состоять из конструктора, методов определения значений 
+атрибутов и из метода рисования человечка.</P>
+
+<b>Шаг 1</b>. Для реализации кода класса начните новый проект. Пустой форме присвойте имя <b>fmMen</b>. Сохраните проект под 
+названием <b>MyMen</b>, присвоив файлу модуля формы имя <b>unMen</b>.<br>
+
+<b>Шаг 2</b>. Создайте новый библиотечный модуль (<b>File\New\Unit</b>) и добавте в него описание класса:   
+<PRE><FONT NAME=Courier New COLOR=BLUE>
+<b>unit</b> MyLibMen;    <FONT COLOR=GREEN>// ##### БИБЛИОТЕКА ОБЪЕКТОВ</FONT>
+
+<FONT COLOR=GREEN>{#############}</FONT> <b>interface</b> <FONT COLOR=GREEN>{#############}</FONT>
+
+<b>uses</b> Graphics, Windows;
+
+<b>type</b>
+TMen = <b>class</b>
+ <b>protected</b>
+      FW,FH : integer;
+      Fp : <b>array</b> [1..15] <b>of</b> TPoint;	<FONT COLOR=GREEN>// 15 характерных точек</FONT>
+      <b>procedure</b> Set_W(Value: integer);
+      <b>procedure</b> Set_H(Value: integer);
+ <b>public</b>
+      x,y : integer;
+      Color : TColor;
+      <b>constructor</b> Create(Xc,Yc: integer; Colorc: TColor);
+      <b>procedure</b> Draw(CNV: TCanvas); <b>virtual</b>;
+      <b>property</b> W: integer <b>read</b> FW <b>write</b> Set_W;  <FONT COLOR=GREEN>// ширина</FONT>
+      <b>property</b> H: integer <b>read</b> FH <b>write</b> Set_H;  <FONT COLOR=GREEN>// высота</FONT>
+<b>end</b>;
+
+<FONT COLOR=GREEN>{#############}</FONT> <b>implementation</b> <FONT COLOR=GREEN>{#############}</FONT>
+
+<b>constructor</b> TMen.Create(Xc,Yc: integer; Colorc: TColor);  <FONT COLOR=GREEN>// конструктор</FONT>
+<b>var</b> w2,w4,w8,h2,h4,h8 : integer;
+<b>Begin</b> <b>inherited</b> Create; 
+  FW:=40;  FH:=100;
+  x:=xc;   y:=yc;
+  Color:=Colorc;
+  w2:=W <b>div</b> 2;	w4:=w2 <b>div</b> 2;	w8:=w4 <b>div</b> 2;	<FONT COLOR=GREEN>// вспомогательные параметры</FONT>
+  h2:=H <b>div</b> 2;	h4:=h2 <b>div</b> 2;	h8:=h4 <b>div</b> 2;
+  Fp[1].y:=-H+H <b>div</b> 10; Fp[2].y:=-H+h4;	      	Fp[3].y:=-h2;
+  Fp[4].x:=-w4;	   Fp[4].y:=Fp[2].y;    <FONT COLOR=GREEN>// левая рука</FONT>
+  Fp[5].x:=-3*w8;  Fp[5].y:=Fp[2].y+h8;
+  Fp[6].x:=-w4;    Fp[6].y:=Fp[3].y;
+  Fp[7]:=Fp[4];	   Fp[7].x:=-Fp[4].x;   <FONT COLOR=GREEN>// правая рука</FONT>
+  Fp[8]:=Fp[5];	   Fp[8].x:=-Fp[5].x;
+  Fp[9]:=Fp[6];	   Fp[9].x:=-Fp[6].x;
+  Fp[10].x:=-w4;   Fp[10].y:=-h4;       <FONT COLOR=GREEN>// левая нога</FONT>
+  Fp[11].x:=-w4;   Fp[11].y:=0;
+  Fp[12].x:=-3*w8; Fp[12].y:=0;
+  Fp[13]:=Fp[10];  Fp[13].x:=-Fp[10].x; <FONT COLOR=GREEN>// правая нога</FONT>
+  Fp[14]:=Fp[11];  Fp[14].x:=-Fp[11].x;
+  Fp[15]:=Fp[12];  Fp[15].x:=-Fp[12].x;
+<b>End</b>;
+
+<b>procedure</b> TMen.Set_W(Value: integer);   <FONT COLOR=GREEN>// установить ширину</FONT>
+<b>var</b> i : integer;   k : single;
+<b>Begin</b>
+  <b>if</b> (W<>Value)<b>and</b>(Value>=8) <b>then</b> 
+   <b>begin</b> k:=Value/W; 
+    <b>for</b> i:=1 <b>to</b> 15 <b>do</b> Fp[i].x:=Round(k*Fp[i].x);
+    FW:=Value;
+   <b>end</b>;
+<b>End</b>;
+
+<b>procedure</b> TMen.Set_H(Value: integer);   <FONT COLOR=GREEN>// установить высоту</FONT>
+<b>var</b> i : integer;   k : single;
+<b>Begin</b>
+  <b>if</b> (H<>Value)<b>and</b>(Value>=10) <b>then 
+   begin</b> k:=Value/H; 
+    <b>for</b> i:=1 <b>to</b> 15 <b>do</b> Fp[i].y:=Round(k*Fp[i].y);
+    FH:=Value;
+   <b>end</b>;
+<b>End</b>;
+
+<b>procedure</b> TMen.Draw(CNV: TCanvas);   <FONT COLOR=GREEN>// нарисовать человечка на канве CNV</FONT>
+<b>var</b> i,w4,h10 : integer;   
+    Xp,Yp : <b>array</b> [1..15] <b>of</b> integer;
+<b>Begin</b>
+  <b>for</b> i:=1 <b>to</b> 15 <b>do</b> 
+     <b>begin</b>
+        Xp[i]:=x+Fp[i].x;  Yp[i]:=y+Fp[i].y;
+     <b>end;</b>
+  <b>with</b> CNV <b>do
+   begin</b> Brush.Color:=Color;
+     Pen.Color:=Color;  Pen.Style:=psSolid;    Pen.Width:=5;
+     MoveTo(Xp[1],Yp[1]); LineTo(Xp[3],Yp[3]);	<FONT COLOR=GREEN>// туловище</FONT>
+     MoveTo(Xp[4],Yp[4]); LineTo(Xp[7],Yp[7]);	<FONT COLOR=GREEN>// плечи</FONT>
+     MoveTo(Xp[4],Yp[4]); LineTo(Xp[5],Yp[5]);	<FONT COLOR=GREEN>// левая рука</FONT>
+     LineTo(Xp[6],Yp[6]);
+     MoveTo(Xp[7],Yp[7]); LineTo(Xp[8],Yp[8]);	<FONT COLOR=GREEN>// правая рука</FONT>
+     LineTo(Xp[9],Yp[9]);
+     MoveTo(Xp[3],Yp[3]);   LineTo(Xp[10],Yp[10]); <FONT COLOR=GREEN>// левая нога</FONT>
+     LineTo(Xp[11],Yp[11]); LineTo(Xp[12],Yp[12]);
+     MoveTo(Xp[3],Yp[3]);   LineTo(Xp[13],Yp[13]); <FONT COLOR=GREEN>// правая нога</FONT>
+     LineTo(Xp[14],Yp[14]); LineTo(Xp[15],Yp[15]);
+     Pen.Width:=3;
+     w4:=W <b>div</b> 4;  h10:=H <b>div</b> 10;
+     Ellipse(Xp[1]-w4,Yp[1]-h10,Xp[1]+w4,Yp[1]+h10); <FONT COLOR=GREEN>// голова</FONT>
+   <b>end;</b>
+<b>End</b>;
+
+<FONT COLOR=GREEN>{#############}</FONT> <b>END.</b></FONT></PRE>
+
+Сохраните модуль под именем <b>MyLibMen</b>.<br><br>
+
+<b>Шаг 3</b>. Перейдите на страничку редактора модуля формы <b>unMen</b> и настройте свойства формы: 
+<TABLE>
+ <TR><TD><i>Свойство</i></TD><TD><i>Значение</i></TD></TR>
+ <TR><TD><b>Caption</b></TD><TD>Человечки</TD></TR>
+ <TR><TD><b>Position</b></TD><TD>ScreenCenter</TD></TR>
+ <TR><TD><b>WindowState</b></TD><TD>wsMaximized</TD></TR>
+</TABLE>
+Поместите на форму кнопку <b>Button</b> и присвойте ее свойствам следующие значения 
+<TABLE>
+ <TR><TD><i>Свойство</i></TD><TD><i>Значение</i></TD></TR>
+ <TR><TD><b>Caption</b></TD><TD>ПЕРЕРИСОВАТЬ</TD></TR>
+ <TR><TD><b>Name</b></TD><TD>BDraw</TD></TR>
+</TABLE>
+Щелкните на кнопке BDraw и создайте обработчик события <b>OnClick</b>:
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TfmMen.BDrawClick(Sender: TObject);
+<b>const</b> Nm = 10;
+<b>var</b> k : word;    
+       M : <b>array</b> [1..Nm] <b>of</b> TMen;
+<b>begin</b>
+  <b>for</b> k:=1 <b>to</b> Nm <b>do</b>   <FONT COLOR=GREEN>// инициализируем человечков CNV</FONT>
+      M[k]:=TMen.Create(100+Random(ClientWidth-200),150+Random(ClientHeight-200),
+                         RGB(55+Random(200),55+Random(200),55+Random(200)));
+		<FONT COLOR=GREEN>// рисуем на CNV</FONT>
+  <b>for</b> k:=1 <b>to</b> Nm <b>do</b> M[k].Draw(Canvas);
+		<FONT COLOR=GREEN>// удаляем точки CNV</FONT>
+  <b>for</b> k:=1 <b>to</b> Nm <b>do</b> M[k].Free;
+<b>end</b>;
+</FONT></PRE>
+
+<FONT COLOR=RED>Примечание! Для Lazarus вместо функции <b>Rgb</b> использовать функцию <b>RgbToColor</b>.</FONT><br><br>
+
+В секции <b>uses</b> модуля формы подключите библиотечный модуль <b>MyLibMen</b>.<br>
+В <b>Испекторе объектов</b> выберите свойство <b>OnPaint</b> и подключите для него событие <b>bmDrawClick</b>.<br> 
+Откомпилируйте проект и проверте результат.
+
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="MyMen.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<img SRC="../../PIC/zadan.gif" ALIGN=LEFT>
+ <FONT SIZE=6><u><i>Задания для самостоятельного выполнения</i></u></FONT><br><br>
+
+<u><b>Задание 1.</b></u> Разработать плоский геометрический объект, указаный в Вашем варианте. Каждый объект
+должен уметь нарисовать себя в заданной точке в заданной ориентации к оси Х, а также уметь себя
+масштабировать. Придумать поля данных, свойства и методы объекта. 
+Написать программу, иллюстрирующую применение данного объекта.
+<TABLE>
+  <TR><TD>1. <FONT SIZE=+4 FACE="Symbol">&#170;</FONT></TD>   <TD>2. <FONT SIZE=+4 FACE="Symbol">&#167;</FONT></TD>   <TD>3. <FONT SIZE=+4 FACE="Wingdings">&#171;</FONT></TD> <TD>4. <FONT size=+4 FACE="Wingdings">&#61;</FONT></TD></TR>
+  <TR><TD>5. <FONT size=+4 FACE="Wingdings">&#60;</FONT></TD> <TD>6. <FONT SIZE=+4 FACE="Wingdings">&#240;</FONT></TD><TD>7. <FONT SIZE=+4 FACE="Wingdings">&#84;</FONT></TD>  <TD>8. <FONT size=+4 FACE="Wingdings">&#74;</FONT></TD></TR>
+  <TR><TD>9. <FONT size=+4 FACE="Symbol">&#169;</FONT></TD>   <TD>10.<FONT size=+4 FACE="Wingdings">&#54;</FONT></TD> <TD>11.<FONT size=+4 FACE="Wingdings">&#91;</FONT></TD>  <TD>12.<FONT size=+4 FACE="Wingdings">&#88;</FONT></TD></TR>
+</TABLE>
+
+<u><b>Задание 2.</b></u> Разработать иерархию из 3-х объектов, указаных в Вашем варианте. 
+Каждый объект должен уметь нарисовать себя в заданной точке в заданной ориентации к оси Х, а также уметь себя масштабировать.
+Придумать поля данных, свойства и методы объекта. Написать программу, иллюстрирующую применение данного объекта.<br>
+<u><i>Раздел ТЕХНИКА</i></u>
+<TABLE>
+  <TR><TD>1. Машинки</TD> <TD>2. Домики</TD>  <TD>3. Самолеты</TD><TD>4. Ракеты</TD></TR>
+  <TR><TD>5. Корабли</TD> <TD>6. Роботы</TD>  <TD>7. Тракторы</TD><TD>8. Мотоциклы</TD></TR>
+  <TR><TD>9. Автобусы</TD><TD>10.Паровозы</TD><TD>11.Катера</TD>  <TD>12.Пылесосы</TD></TR>
+</TABLE>
+<u><i>Раздел РАСТЕНИЯ</i></u>
+<TABLE>
+  <TR><TD>1. Деревья</TD><TD>2. Пальмы</TD>    <TD>3. Цветы</TD>          <TD>4. Грибы</TD></TR>
+  <TR><TD>5. Ягоды</TD>  <TD>6. Кустарники</TD><TD>7. Листья деревьев</TD><TD>8. Кактусы</TD></TR>
+  <TR><TD>9. Фрукты</TD> <TD>10.Овощи</TD>     <TD>11.Комнатные цветы</TD><TD>12.Корнеплоды</TD></TR>
+</TABLE>
+<u><i>Раздел ЖИВОТНЫЕ</i></u>
+<TABLE>
+  <TR><TD>1. Собачки</TD>  <TD>2. Кошки</TD>   <TD>3. Медведи</TD><TD>4. Бабочки</TD></TR>
+  <TR><TD>5. Рыбки</TD>    <TD>6. Птички</TD>  <TD>7. Ящерицы</TD><TD>8. Стрекозы</TD></TR>
+  <TR><TD>9. Динозавры</TD><TD>10. Муравьи</TD><TD>11. Пауки</TD> <TD>12.Змеи</TD></TR>
+</TABLE>
+
+<br><b><i>Пояснения к выполнению задания</i></b><br>
+Для выполнения задания создадим иерархию 3-х объектов. Например, для 1-ого варианта имеем:<br>
+<b><i>Машинки<br>
+Деревья<br>
+Собачки</b></i><br>
+т.к. это рисунки, то для реализации иерархии добавим еще один абстрактный класс - <b><i>TPicAbstract</i></b>:<br>
+<PRE><FONT COLOR=BLUE>
+TPicAbstract = <b>class</b>
+  <b>protected</b>
+   FW,FH,FNp : <b>word</b>;
+   FP : PAPoint;
+   FCNV : TCanvas;
+   <b>procedure</b> Set_W(Value: <b>word</b>);
+   <b>procedure</b> Set_H(Value: <b>word</b>);
+   <b>function</b> GetP(Npc: word): TPoint;
+  <b>public</b>
+   x,y : <b>integer</b>;        <FONT COLOR=GREEN><i>//якорная точка</i></FONT>
+   Color : TColor;       <FONT COLOR=GREEN><i>//цвет рисунка</i></FONT>
+   <b>constructor</b> Create(Npc,Xc,Yc: <b>integer</b>; C: TColor; CNVc: TCanvas);
+   <b>destructor</b> Destroy; <b>override</b>;
+   <b>property</b> CNV: TCanvas <b>read</b> FCNV;               <FONT COLOR=GREEN><i>//канва</i></FONT>
+   <b>property</b> Np: <b>word read</b> FNp;                    <FONT COLOR=GREEN><i>//число точек</i></FONT>
+   <b>property</b> P[Npc: word]: TPoint <b>read</b> GetP;       <FONT COLOR=GREEN><i>//точка Npc</i></FONT>
+   <b>property</b> W: <b>word read</b> FW <b>write</b> Set_W;          <FONT COLOR=GREEN><i>//ширина</i></FONT>
+   <b>property</b> H: <b>word read</b> FH <b>write</b> Set_H;          <FONT COLOR=GREEN><i>//высота</i></FONT>
+   <b>procedure</b> Draw; <b>virtual</b>;
+<b>end</b>;                     
+</PRE></FONT>
+Как можно видеть, абстрактный класс содержит все общие поля данных (координаты якорной точки,цвет,канву,число и массив координат опорных точек),
+общие свойства (канва,ширина,высота,количество опорных точек,координаты точки Npc) и общие методы (конструктор,деструктор,масштабирование Set_W и Set_H,
+рисования Draw) данного типа рисунков. Название класса начинается с символа "T", т.к. класс - это тип данных (Type).<br> 
+Описание класса содержит две секции:<br>
+<b>protected</b> (защищенной) - к полям и методам можно обращаться только из методов данного класса;<br>
+<b>public</b> (открытый) - к полям и методам можно обращаться из любого места программы.<br>
+Защищенные поля данных принято называть начиная с символа "F' (от Field-"поле"). Доступ к таким полям данных реализуется через свойства 
+(<b>property</b>) класса.<br>
+Свойства CNV, Np и P[Npc] доступны только для чтения (read). Переопределить их пользователь не может.<br>
+Высоту H и ширину W рисунка пользователь может как прочитать (read), так и записать (write), выполняя масштабирование рисунка. 
+При этом при чтении идет подстановка соответствующего защищенного поля (FW или FH), а при записи, вызов соответствующей процедуры (Set_W или Set_H), 
+т.к. требуется не только изменить значение соответствующего поля, но и пересчитать координаты FP опорных точек рисунка:<br>
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TPicAbstract.Set_W(Value: <b>word</b>);   <FONT COLOR=GREEN><i>//установить ширину</i></FONT>
+<b>var</b> i : <b>integer</b>;   k : <b>single</b>;
+<b>Begin</b> 
+  <b>if</b> (W<>Value)<b>and</b>(Value>=8) <b>then</b>
+   <b>begin</b> k:=Value/W;
+    <b>for</b> i:=1 <b>to</b> Np <b>do</b> Fp^[i].x:=Round(k*Fp^[i].x);
+    FW:=Value;
+   <b>end</b>;
+<b>End</b>;
+<b>procedure</b> TPicAbstract.Set_H(Value: <b>word</b>);   <FONT COLOR=GREEN><i>//установить высоту</i></FONT>
+<b>var</b> i : <b>integer</b>;   k : <b>single</b>;
+<b>Begin</b>
+  <b>if</b> (H<>Value)<b>and</b>(Value>=10) <b>then</b>
+   <b>begin</b> k:=Value/H;
+    <b>for</b> i:=1 <b>to</b> Np <b>do</b> Fp^[i].y:=Round(k*Fp^[i].y);
+    FH:=Value;
+   <b>end</b>;
+<b>End</b>;     
+</PRE></FONT><br>
+Конструктор класса:
+<PRE><FONT COLOR=BLUE>
+<b>constructor</b> TPicAbstract.Create(Npc,Xc,Yc: <b>integer</b>; C: TColor; CNVc: TCanvas); 
+<b>Begin inherited</b> Create;               <FONT COLOR=GREEN><i>//вызываем конструктор предка TObject</i></FONT>
+  FNp:=Npc;                           <FONT COLOR=GREEN><i>//задаем число опорных точек</i></FONT>
+  GetMem(FP,Np*SizeOf(TPoint));       <FONT COLOR=GREEN><i>//выделяем память под массив опорных точек</i></FONT>
+  FCNV:=CNVc;  x:=Xc; y:=Yc; Color:=C;<FONT COLOR=GREEN><i>//устанавливаем остальные поля</i></FONT>
+<b>End</b>;
+</PRE></FONT>
+Как правило, первым оператором конструктора идет вызов конструктора предка. В данном случае, т.к. предком любого объекта
+в Delphi или Lazaruse является класс TObject (реализуется динамическая модель объектов, когда экземпляр любого объекта обязательно 
+является динамической переменной, а пременная, связанная с этим экземпляром, является указателем), то вызывается конструктор данного класса,
+выделяющий динамическую память экземпляру. В конструкторе класса TPicAbstract после вызова конструктора предка выделяется память для массива
+опорных точек и задаются общие поля рисунков данного типа.<br>
+Деструктор класса TPicAbstrac освобожает память для массива опорных точек. Последним оператором деструктора является вызов деструктора предка
+(объекта TObject):
+<PRE><FONT COLOR=BLUE>
+<b>destructor</b> TPicAbstract.Destroy;
+<b>Begin</b>
+  FreeMem(FP,Np*SizeOf(TPoint));<FONT COLOR=GREEN><i>//освобождаем память из под массива опорных точек</i></FONT>
+  <b>inherited</b> Destroy;            <FONT COLOR=GREEN><i>//вызываем деструктор предка TObject</i></FONT>
+<b>End</b>;
+</PRE></FONT>
+Класс TPicAbstract имеет свойство доступа к координатам опорной точки P[Npc: word]: TPoint, где предопределенная в системе программирования
+структура данных<br>
+<PRE><FONT COLOR=BLUE>
+TPoint = <b>record</b>
+ x,y : <b>integer</b>;
+<b>end</b>;
+</PRE></FONT>
+Здесь (x,y) - графические (целочисленные) координаты точки. Свойство P[Npc] доступно для чтения с помощью функции GetP:
+<PRE><FONT COLOR=BLUE>
+<b>function</b> TPicAbstract.GetP(Npc: <b>word</b>): TPoint;
+<b>Begin</b>
+  <b>if</b> (Npc>0)<b>and</b>(Npc<=Np) <b>then</b> <b>Result</b>:=FP^[Npc] <b>else</b> Result:=FP^[1]
+<b>End</b>; 
+</PRE></FONT>
+Данная функция читает соответствующий элемент из защищенного динамического массива FP, проверяя при этом номер опорной точки на допустимость.<br>
+Для данного абстрактного класса определен метод рисования Draw, который объявлен виртуальным (virtual). В этом случае заголовок данного метода
+должен быть одинаковым у всех потомков данного класса. В Delphi реализация данного метода может отсутствовать, если после ключевого слова 
+<b.virtual</b> указать ключевое слово <b>abstruct</b>:<br>
+<b>procedure</b> TPicAbstract.Draw; <b>virtual; abstruct</b>;<br>
+В Lazarus придется использовать процедуру-пустышку:
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TPicAbstract.Draw;
+<b>Begin</b>
+<b>End</b>; 
+</PRE></FONT>
+ 
+<br><hr><a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</HTML>

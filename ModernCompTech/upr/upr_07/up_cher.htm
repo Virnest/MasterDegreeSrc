@@ -1,0 +1,136 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<P><i><FONT SIZE=6>Упражнение 7.Простейший графический редактор</FONT></i></P>
+
+<P>1. Создадим новое приложение <b>File > New Application</b> и сохраним его в созданном для данного
+приложения подкаталоге <b>Paint</b> своего каталога. При записи модулю формы присвоим имя <b>MainForm</b>,
+а проекту - <b>Paint</b>.</P>
+
+2. Настроим свойства формы:
+<TABLE>
+ <TR><TD><i>Свойство</i></TD><TD><i>Значение</i></TD></TR>
+ <TR><TD><b>Caption</b></TD><TD>Художник</TD></TR>
+ <TR><TD><b>Position</b></TD><TD>ScreenCenter</TD></TR>
+ <TR><TD><b>WindowState</b></TD><TD>wsMaximized</TD></TR>
+</TABLE>
+Запустим задание и проверим результат.<br><br>
+
+<P>3. Поместим на форму строку состояния (страница <b>Win32</b> компонент <b>StatusBar</b>).
+Стока состояния расположится внизу формы и ей присвоится имя <i>StatusBar1</i>. Выделим 
+свойство <b>Panels</b> данного компонента и щелкнем по кнопочке с тремя точками. В результате
+на экране появится окно редактора строки состояния <b>Editing StatusBar1.Panels</b>.<br>
+С помощью кнопки <b>Add New</b> данного окна создадим панельку "0". Свойству <b>Text</b>
+полученной панельки присвоим значение <i>Курсор</i>, свойству <b>Bevel</b> - <i>pbNone</i>,
+ а свойству <b>Alignment</b> - <i>taCenter</i>.<br>
+Добавим еще одну панельку. В поле <b>Text</b> занесем значение <i>XY</i>, в свойство <b>Width</b> - 
+значение 65, а свойству <b>Alignment</b> - <i>taCenter</i>.<br>
+Наконец, добавим еще одну панельку и оставим ее параметры без изменения.</P>
+
+<P>4. Щелкнем курсором на форме и добавим обработчик события <b>OnMouseMove</b>. Для этого
+перейдем на страничку <b>Events</b> и щелкнем на поле значения данного события. В тексте
+модуля формы (файл <b>MainForm</b>) будет создана заготовка для обработчика данного события.
+Поместим в данный обработчик следующий текст:
+
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
+<b>begin</b>
+   StatusBar1.Panels[1].Text:=IntToStr(x)+'; '+IntToStr(y);
+<b>end</b>;
+</FONT></PRE> 
+
+Запустим задание и поперемещаем курсор. Как можно видеть, при перемещении курсора в строке состояния
+будут изменяться значения координат курсора. Выводимые значения <b>x</b> и <b>y</b> соответствуют точке, 
+расположенной в строке <b>y</b> и столбце <b>x</b> канвы формы над которой находится курсор.</P>
+
+<P>5. Добавим возможность рисования при нажатой левой клавише мыши. Для этого определим обработчик
+события <b>OnMouseDown</b> нажатия клавиши
+
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+<b>begin</b>
+   <FONT COLOR=RED>// если нажата левая клавиша мыши, то устанавливаются начальные координаты пера</FONT>
+   <b>if</b> ssLeft <b>in</b> Shift <b>then</b> Canvas.MoveTo(x,y);
+<b>end</b>;
+</FONT></PRE> 
+
+Дополним обработчик события <b>OnMouseMove</b>
+
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
+<b>begin</b>
+   StatusBar1.Panels[1].Text:=IntToStr(x)+'; '+IntToStr(y);
+   <FONT COLOR=RED>// если нажата левая клавиша мыши, то рисуем линию</FONT>
+   <b>if</b> ssLeft <b>in</b> Shift <b>then</b> Canvas.LineTo(x,y);
+<b>end</b>;
+</FONT></PRE> 
+
+Запустим задание и поперемещаем курсор при нажатой и отпущеной левой клавише мыши. Как можно видеть
+при перемещении мышки с нажатой клавишей выполняется рисование линии черным цветом.
+
+<P>6. Добавим возможность изменения цвета пера. Для этого поместим на форму компонент <b>ColorGrid</b>
+со странички <b>Samples</b> и добавим обрабочик события <OnClick</b> данного компонента
+
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.ColorGrid1Click(Sender: TObject);
+<b>begin</b>
+   Canvas.Pen.Color:=ColorGrid1.ForegroundColor;
+<b>end</b>;
+</FONT></PRE> 
+
+Запустим задание. Если выбирать цвет с помощью левой клавиши мышки, то в компоненте <b>ColorGrid1</b>
+над выбранным цветом будут устанавливаться символы <b>FG</b>. Линия при нажатой левой клавише мыши
+будет рисоваться выбранным цветом.</P>
+
+<P>7. Добавим возможность изменения толщины пера. Для этого поместим на форму компонент <b>RadioGroup</b>
+со странички <b>Standard</b>. Щелкнем на кнопочке с 3-я точками для свойства <b>Items</b> и в появивщемся окне редактора
+введем числа от 1 до 10 в каждой строке. Настроим остальные свойства данного компонента
+<TABLE>
+ <TR><TD><i>Свойство</i></TD><TD><i>Значение</i></TD></TR>
+ <TR><TD><b>Caption</b></TD><TD>Толщина пера</TD></TR>
+ <TR><TD><b>Columns</b></TD><TD>10</TD></TR>
+ <TR><TD><b>ItemIndex</b></TD><TD>0</TD></TR>
+</TABLE>
+Добавим обрабочик события <b>OnClick</b> данного компонента
+
+<PRE><FONT COLOR=BLUE>
+<b>procedure</b> TForm1.RadioGroup1Click(Sender: TObject);
+<b>begin</b>
+   Canvas.Pen.Width:=RadioGroup1.ItemIndex+1;
+<b>end</b>;
+</FONT></PRE> 
+
+Запустим задание и выполним рисование с различными толщинами линий.</P>
+
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="Paint.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<img SRC="../../PIC/zadan.gif" ALIGN=LEFT>
+ <FONT SIZE=6><u><i>Задание для самостоятельного выполнения</i></u></FONT><br><br>
+
+Добавить в полученный графический редактор возможность рисования:
+<OL>
+ <LI>точки;
+ <LI>отрезка прямой линии;
+ <LI>квадрата;
+ <LI>прямоугольника;
+ <LI>окружности;
+ <LI>эллипса;
+ <LI>ломаной линии;
+ <LI>заливки замкнутого контура;
+ <LI>текста;
+ <LI>треугольника;
+ <LI>пятиконечной звездочки;
+ <LI>многоугольника;
+</OL>
+
+<hr><a href="../upr.htm"><i>вернуться к оглавлению</i></a><br> 
+
+</BODY>
+</HTML>

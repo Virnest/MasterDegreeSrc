@@ -1,0 +1,179 @@
+<html>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1251">
+</HEAD>
+<BODY>
+
+<FONT SIZE=6>Упражнение 10.Работа с текстовыми файлами</FONT><br><br>
+
+<i><b>Задание 1. Просмотр текстовых файлов</b></i>.<br>
+Требуется написать программу, позволяющую просматривать текстовые файлы.<br>
+Выполните следующие действия:<br>
+<OL>
+  <LI>Начните новый проект. Пустой форме присвойте имя <i>fmViewText</i>.
+      Сохраните проект под названием <i>ViewText</i>, присвоив файлу модуля
+      формы имя <i>unView</i>.
+  <LI>Свойству <i>Caption</i> формы присвойте значение <i>Просмотр текстовых файлов</i>.<br>
+      Свойству <i>Position</i> формы присвойте значение <i>psScreenCenter</i> - расположить в центре экрана.<br>
+      Свойству <i>WindowState</i> формы присвойте значение <i>wsMaximize</i>.
+  <LI>Поместите на форму главное меню. Для этого со страницы <i>Standard</i> палитры
+      компонент перетащите на форму <i>MainMenu</i>. Вызовите редактор <i>MainMenu</i>,
+      щелкнув левой клавищей мышки на свойстве <i>Items</i>.<br>
+      Свойству <i>Name</i> 1-ого компонента <i>TMenuItem</i> присвойте значение <i>MF_Open</i>,
+      а свойству <i>Caption</i> - значение <i>Файл</i>;<br> 
+      - в Delphi щелкните на пустом прямоугольнике справа от компонента <i>Файл</i>, для появивщегося 2-ого компонента 
+      <i>TMenuItem</i> задайте поле <i>Name</i> = <i>MF_Stat</i>, а для <i>Caption</i> = <i>Статистика</i>;<br>
+      добавте 3-й компонент <i>TMenuItem</i> и назовите его <i>MF_Quit</i> со свойством <i>Caption</i> = <i>Выход</i>.<br>
+      - в Lazarus для добавления нового пункта меню поместить курсор на последний существующий пункт меню 
+      и нажатием правой кнопки мыши вызвать всплывающее меню. Затем из этого меню выбрать строку <i>Вставить новый пункт (после)</i>
+      добавить новый пункт меню. Вставить пункты <i>Статистика</i> и <i>Выход</i>.<br>
+  <LI>Переместитесь на форму и поместите туда строку состояния <i>StatusBar</i> 
+      со страницы <i>Win32</i> в Delphi или со страницы <i>Common Controls</i> в Lazarus. 
+      Полю <i>Name</i> строки состояния присвойте
+      значение <i>SB</i>. Определите 3 поля данной строки: Файл, Строк, Слов.
+  <LI>Поместите на форму компонент <i>PageControl</i> со страницы <i>Win32</i> в Delphi или со страницы <i>Common Controls</i> в Lazarus. 
+      Полю <i>Name</i> компонента присвойте значение <i>PgCntr</i>.
+      Полю <i>Align</i> компонента присвойте значение <i>alClient</i>.
+      Поместите курсор на компонент <i>PgCntr</i> на форме и щелкните правой
+      клавишей мышки, вызвав контекстное меню. Выберите строку <i>NewPage</i> и
+      добавте новую страницу. Свойству <i>Caption</i> страницы присвойте
+      значение <i>Текст</i>.
+  <LI>Поместите на страницу <i>Текст</i> компонент <i>Memo</i> со страницы <i>Standard</i>.
+      Полю <i>Align</i> компонента <i>Memo</i> присвойте значение <i>alClient</i>.
+  <LI>Поместите на форму компонент <i>OpenDialog</i> со страницы <i>Dialogs</i>.
+      Полю <i>Name</i> компонента присвойте значение <i>OpenDlg</i>.<br>
+      Полю <i>FileName</i> присвойте значение <i>*.pas</i>.<br>
+      Настройте фильтр. Для этого щелкните по кнопке редактора <i>Filter</i> 
+      (кнопка с 3 точками справа от редактируемого свойства). В появивщемся окне
+      редактора фильтра задайте следующие значения:
+      <TABLE>
+       <TR><TD>Filter Name</TD><TD>Filter</TD></TR> 
+       <TR><TD>Программы на Паскале</TD><TD>*.pas</TD></TR> 
+       <TR><TD>Текстовые файлы</TD><TD>*.txt</TD></TR> 
+       <TR><TD>Все файлы</TD><TD>*.*</TD></TR> 
+      </TABLE>
+</OL>
+Щелкните на строке <i>Файл</i> главного меню и добавте следующий обработчик
+события:
+<PRE><FONT COLOR=NAVY>
+<b>procedure</b> TfmViewText.MF_OpenClick(Sender: TObject);
+<b>var</b> MF : TextFile;    s : string;
+<b>begin</b>
+  <b>if</b> OpenDlg.Execute <b>then</b>
+   <b>begin</b>
+     AssignFile(MF,OpenDlg.FileName); <FONT COLOR=GREEN>//связываем файловую переменную</FONT>
+     Reset(MF);                       <FONT COLOR=GREEN>//открываем файл</FONT>
+     Memo1.Lines.Clear;               <FONT COLOR=GREEN>//очищаем список строк</FONT>
+     <b>while not</b> Eof(MF) <b>do</b>             <FONT COLOR=GREEN>//читаем файл</FONT>
+      <b>begin</b>
+        ReadLn(MF,s);
+        Memo1.Lines.Add(S);           <FONT COLOR=GREEN>//добавляем строки</FONT>
+      <b>end;</b>
+     CloseFile(MF);                   <FONT COLOR=GREEN>//закрываем файл</FONT>
+     SB.Panels.Items[0].Text:=OpenDlg.FileName;
+     SB.Panels.Items[1].Text:='Строк '+IntToStr(Memo1.Lines.Count);
+     SB.Panels.Items[2].Text:='Слов 0';
+   <b>end;</b>
+<b>end;</b>
+</FONT></PRE>
+
+Щелкните на строке <i>Выход</i> главного меню и добавте следующий обработчик
+события:
+<PRE><FONT COLOR=NAVY>
+<b>procedure</b> TfmViewText.MF_QuitClick(Sender: TObject);
+<b>begin</b>
+  Close;
+<b>end;</b>
+</FONT></PRE>
+Запустите программу и, выбрав командой меню <i>Файл</i> текстовый файл модуля
+данной программы, откройте его. После его открытия в строке состояния будет выведено
+имя файла и число его строк.<br><br>
+
+Из меню "Пуск" операционной системы загрузите текстовый редактор "Блокнот" и создайте
+тестовый текстовый файл со следующим содержанием:
+<PRE><FONT FACE=Courier New COLOR=NAVY>
+  111  222  333   
+  444  555  111  444  000    
+  666
+777 
+</FONT></PRE>
+состоящий из 4 строк и 10 слов. Сохраните его под именем "Example.pas". Запустите программу
+и проверте правильность ее работы.<br><br>
+
+Добавте в секцию реализации модуля функцию подсчета слов в строке. Словом будем 
+называть последовательность символов, не содержащих пробелы.
+<PRE><FONT COLOR=NAVY>
+<b>function</b> StrNumWord(s: String): word;
+<b>Begin</b> Result:=0; 
+  <b>if</b> Length(s)=0 <b>then</b> Exit;  <FONT COLOR=GREEN>//закнчиваем функцию,если строка не содержит символы</FONT>
+  <b>while</b> s[1]=' ' <b>do</b> Delete(s,1,1);                <FONT COLOR=GREEN>//удаляем начальные пробелы</FONT>
+  <b>while</b> s[Length(s)]=' ' <b>do</b> Delete(s,Length(s),1);<FONT COLOR=GREEN>//удаляем конечные пробелы</FONT>
+  <b>while</b> Pos('  ',s)&lt;&gt;0 <b>do</b> Delete(s,Pos('  ',s),1);<FONT COLOR=GREEN>//удаляем сдвоенные пробелы</FONT>
+  <b>if</b> Length(s)>0 <b>then</b>
+   <b>begin</b> Result:=1;
+    <b>while</b> Pos(' ',s)&lt;&gt;0 <b>do</b>                        <FONT COLOR=GREEN>//считаем слова</FONT>
+     <b>begin</b> Result:=Result+1;
+      Delete(s,1,Pos(' ',s));
+     <b>end</b>;
+   <b>end</b>;
+<b>End</b>;
+</FONT></PRE>
+Щелкните на строке <i>Статистика</i> главного меню и добавьте следующий обработчик
+события:
+<PRE><FONT COLOR=NAVY>
+<b>procedure</b> TfmViewText.MF_StatClick(Sender: TObject);
+<b>var</b> k,n : word;  s : ShortString;
+<b>begin</b>
+  n:=0;
+  <b>for</b> k:=1 <b>to</b> Memo1.Lines.Count <b>do</b>
+   <b>begin</b> 
+     s:=Memo1.Lines.Strings[k-1]; <FONT COLOR=GREEN>//выбираем строку из списка строк</FONT>
+     n:=n+StrNumWord(s);
+   <b>end</b>;
+  SB.Panels.Items[2].Text:='Слов '+IntToStr(n);
+<b>end</b>;
+</FONT></PRE>
+Используя файл "Example.pas", проверте правильность работы программы.
+
+<hr>
+<CENTER><FONT FACE="Wingdings" size=6>&#70;</FONT>
+<a href="ViewText.exe">Пример выполняемой программы</a>
+<FONT FACE="Wingdings" size=6>&#69;</FONT></CENTER>
+<hr>
+
+<P><i><b>Задание 2. Построение словаря</b></i>.<br>
+Добавить в программу задания 1 возможность построения словаря текста. Словарь 
+представляет собой таблицу из 3-х колонок:
+<TABLE BORDER=1>
+ <TR><TD> №пп </TD><TD> Слово </TD><TD> Кол-во </TD></TR>
+ <TR><TD> 1   </TD><TD> 000 </TD><TD> 1 </TD></TR>
+ <TR><TD> 2   </TD><TD> 111 </TD><TD> 2 </TD></TR>
+ <TR><TD> 3   </TD><TD> 222 </TD><TD> 1 </TD></TR>
+ <TR><TD> 4   </TD><TD> 333 </TD><TD> 1 </TD></TR>
+ <TR><TD> 5   </TD><TD> 444 </TD><TD> 2 </TD></TR>
+ <TR><TD> 6   </TD><TD> 555 </TD><TD> 1 </TD></TR>
+ <TR><TD> 7   </TD><TD> 666 </TD><TD> 1 </TD></TR>
+ <TR><TD> 8   </TD><TD> 777 </TD><TD> 1 </TD></TR>
+</TABLE>
+Колонка 1 содержит номер слова; колонка 2 - само слово; колонка 3 - количество
+употреблений данного слова в тексте.</P>
+
+<P><i><b>Задание 3. Сортировка словаря</b></i>.<br>
+Добавить к программе задания 2 возможность сортировки слов в словаре:
+<OL>
+ <LI>по алфавиту;
+ <LI>по длине слова;
+ <LI>по частоте употребления слов в тексте;
+ <LI>по алфавиту без учета региста.
+</OL>
+</P>
+
+<P><i><b>Задание 4. Запись словаря в текстовый файл</b></i>.<br>
+Добавить к программе задания 3 возможность записи словаря в текстовый файл.
+</P>
+
+<hr>
+<a href="../upr.htm"><i>вернуться к оглавлению</i></a><br>  
+
+</BODY>
+</html>

@@ -1,0 +1,14 @@
+[0919/114029.088:ERROR:process_reader_win.cc(242)] ReadMemory at 0x6e610000 of 64 bytes failed: «апрос ReadProcessMemory или WriteProcessMemory был выполнен только частично. (0x12B)
+[0919/114029.233:WARNING:pe_image_reader.cc(302)] could not read dos header from C:\Windows\system32\d3d11.dll
+[0919/114030.588:ERROR:process_reader_win.cc(242)] ReadMemory at 0x6e610000 of 64 bytes failed: «апрос ReadProcessMemory или WriteProcessMemory был выполнен только частично. (0x12B)
+[0919/114030.588:WARNING:pe_image_reader.cc(302)] could not read dos header from C:\Windows\system32\d3d11.dll
+[0919/114030.593:ERROR:process_reader_win.cc(242)] ReadMemory at 0x6e610000 of 64 bytes failed: «апрос ReadProcessMemory или WriteProcessMemory был выполнен только частично. (0x12B)
+[0919/114030.593:WARNING:pe_image_reader.cc(302)] could not read dos header from C:\Windows\system32\d3d11.dll
+[0919/114031.333:ERROR:process_reader_win.cc(242)] ReadMemory at 0x6e610000 of 64 bytes failed: «апрос ReadProcessMemory или WriteProcessMemory был выполнен только частично. (0x12B)
+[0919/114031.333:WARNING:pe_image_reader.cc(302)] could not read dos header from C:\Windows\system32\d3d11.dll
+[0919/114032.428:ERROR:process_reader_win.cc(242)] ReadMemory at 0x6e610000 of 64 bytes failed: «апрос ReadProcessMemory или WriteProcessMemory был выполнен только частично. (0x12B)
+[0919/114032.428:WARNING:pe_image_reader.cc(302)] could not read dos header from C:\Windows\system32\d3d11.dll
+[0919/114032.428:ERROR:process_reader_win.cc(242)] ReadMemory at 0x6e610000 of 64 bytes failed: «апрос ReadProcessMemory или WriteProcessMemory был выполнен только частично. (0x12B)
+[0919/114032.428:WARNING:pe_image_reader.cc(302)] could not read dos header from C:\Windows\system32\d3d11.dll
+[0919/114032.493:ERROR:process_reader_win.cc(242)] ReadMemory at 0x6e610000 of 64 bytes failed: «апрос ReadProcessMemory или WriteProcessMemory был выполнен только частично. (0x12B)
+[0919/114032.493:WARNING:pe_image_reader.cc(302)] could not read dos header from C:\Windows\system32\d3d11.dll
