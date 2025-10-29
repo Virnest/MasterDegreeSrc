@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>Лабораторная работа 1.1, Вариант 7, Задание 1</title>
+  </head>
+
+  <body>
+    <script>
+      var surname = prompt("Введите фамилию: ", "Иванов");
+      var name = prompt("Введите Имя: ", "Иван");
+      var fathers_name = prompt("Введите отчество: ");
+      var full_name = surname + " " + name + " " + fathers_name;
+      var isCorrect = confirm("Вы " + full_name + "\nВсе верно?");
+      
+      if (isCorrect) alert("Здрасвуйте, " + full_name + "!");
+      else alert("Ошибка в данных.");
+    </script>
+  </body>
+</html> 

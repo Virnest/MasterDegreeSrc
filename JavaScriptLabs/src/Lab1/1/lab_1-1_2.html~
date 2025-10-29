@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <title>Лабораторная работа 1.1, Вариант 7, Задание 1</title>
+  </head>
+
+  <body>
+    <script>
+      var hours = parseInt(prompt("Введите количество часов:\n"));
+      var minutes = parseInt(prompt("Введите количество минут:\n"));
+      
+      hours += Math.floor(minutes / 60); 
+      minutes = (minutes + 1) % 60;
+
+      if (minutes == 0) hours += 1;
+      hours = hours % 24;
+      alert("Через минуту будет:\n" + hours + " часов " + minutes + " минут");
+    </script>
+  </body>
+</html> 

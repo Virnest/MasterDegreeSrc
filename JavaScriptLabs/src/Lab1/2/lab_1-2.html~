@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Лабораторная работа 1.2, Вариант 7, Задание 1</title>
+    <script> 
+      var hours, minutes;
+      function timeCalc(str1, str2){
+        var hours = parseInt(str1);
+        var minutes = parseInt(str2);
+        
+        hours += Math.floor(minutes / 60);
+        minutes = (minutes + 1) % 60;
+
+        if (minutes == 0) hours += 1;
+        
+        hours = hours % 24;
+        
+        document.getElementById('p3').innerHTML = "Через минуту будет:\n" + hours + " часов " + minutes + " минут";
+      }
+
+      function labInit(){
+        
+        hours = prompt("Введите количество часов:\n");
+        minutes = prompt("Введите количество минут:\n");
+        
+        document.getElementById('p1').innerHTML = "Часы: " + hours;
+        document.getElementById('p2').innerHTML = "Минуты: " + minutes;
+        document.getElementById('p3').innerHTML = null;
+      }
+    </script>
+  </head>
+
+  <body onLoad="labInit()">
+    <h1>Calculate Next Minute</h1>
+    <p id='p1'></p>
+    <p id='p2'></p>
+    <p id='p3'></p>
+    <input type="button" value="Найти время" onClick="timeCalc(hours, minutes);">
+    <input type="button" value="Ввести другое время" onClick="labInit();">
+  </body>
+</html> 
