@@ -1,0 +1,53 @@
+import dearpygui.dearpygui as dpg
+
+def draw_eye(x, y, th=3):
+    A = (x, y)
+    B = (x+25, y+100)
+    dpg.draw_ellipse(A, B, thickness=th, fill=clRed, color=clBlack)
+    
+    A = (x+5, y+50)
+    B = (x+20, y+75)
+    dpg.draw_ellipse(A, B, thickness=th, fill=clBlack, color=clBlack)
+
+def draw_face(x, y, th=3):
+    A = (x, y)
+    B = (x+200, y+300)
+    dpg.draw_ellipse(A, B, thickness=th, color=clBlack, fill=clBlue)
+
+def draw_nose(x, y, th=3):
+    A = (x, y)
+    B = (x+10, y+165)
+    dpg.draw_rectangle(A, B, thickness=th, color=clBlack, fill=clGreen)
+
+def draw_mouth(x, y, th=3):
+    A = (x, y)
+    B = (x+100, y+10)
+    dpg.draw_rectangle(A, B, thickness=th, color=clBlack, fill=clGreen)
+
+
+if __name__ == "__main__":
+    ClientHeight = 400
+    ClientWidth = 300
+
+    clBlack = (0, 0, 0, 255)
+    clRed = (255, 0, 0, 255)
+    clBlue = (0, 0, 255, 255)
+    clGreen = (0, 255, 0, 255)
+    
+    dpg.create_context()
+
+    with dpg.window(tag="Primary Window"):
+        with dpg.drawlist(width=ClientWidth, height=ClientHeight):
+            draw_face(50,50)
+            draw_eye(100,100)
+            draw_eye(175,100)
+            draw_mouth(100,275)
+            draw_nose(145,100)
+            
+    dpg.create_viewport(title='Маска', width=ClientWidth, height=ClientHeight)
+    
+    dpg.setup_dearpygui()
+    dpg.show_viewport()
+    dpg.set_primary_window("Primary Window", True)
+    dpg.start_dearpygui()
+    dpg.destroy_context()
