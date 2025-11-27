@@ -1,0 +1,83 @@
+package main
+
+import (
+	"image/color"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	//"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/canvas"
+)
+
+const (
+	ClientHeight, ClientWidth float32 = 400, 300
+)
+
+func main() {
+	RED := color.NRGBA{R: 255, G: 0, B: 0, A: 255}
+	GREEN := color.NRGBA{R: 0, G: 255, B: 0, A: 255}
+	BLUE := color.NRGBA{R: 0, G: 0, B: 255, A: 255}
+	
+	App := app.New()
+	Window := App.NewWindow("Upr 02")
+	
+	Window.Resize(fyne.NewSize(ClientWidth, ClientHeight))
+	
+	myContainer := fyne.NewContainer()
+	draw_face(myContainer, 50, 50, BLUE)
+	draw_eye(myContainer, 100, 100, RED)
+	draw_eye(myContainer, 175, 100, RED)
+	draw_nose(myContainer, 145, 100, GREEN)
+	draw_mouth(myContainer, 100, 275, GREEN)
+
+	Window.SetContent(myContainer)
+	
+	Window.Show()
+
+	App.Run()
+}
+
+
+func draw_face(content *fyne.Container, x float32, y float32, clr color.NRGBA) {
+	face := canvas.NewCircle(clr)
+	face.Move(fyne.Position{X: x, Y: y})
+	face.Resize(fyne.Size{Width: 200, Height: 300})
+	face.StrokeColor = color.Black
+	face.StrokeWidth = 1.5
+	
+	content.Add(face)
+}
+
+func draw_eye(content *fyne.Container, x float32, y float32, clr color.NRGBA) {
+	eye := canvas.NewCircle(clr)
+	eye.Move(fyne.Position{X: x, Y: y})
+	eye.Resize(fyne.Size{Width: 25, Height: 100})
+	eye.StrokeColor = color.Black
+	eye.StrokeWidth = 1.5
+	pupil := canvas.NewCircle(color.Black)
+	pupil.Move(fyne.Position{X: x+5, Y: y+50})
+	pupil.Resize(fyne.Size{Width: 15, Height: 25})
+
+	content.Add(eye)
+	content.Add(pupil)
+} 
+
+func draw_nose(content *fyne.Container, x float32, y float32, clr color.NRGBA) {	
+	nose := canvas.NewRectangle(clr)
+	nose.Move(fyne.Position{X: x, Y: y})	
+	nose.Resize(fyne.Size{Width:10, Height: 165})
+	nose.StrokeColor = color.Black
+	nose.StrokeWidth = 1.5
+
+	content.Add(nose)
+}
+
+func draw_mouth(content *fyne.Container, x float32, y float32, clr color.NRGBA) {
+	mouth := canvas.NewRectangle(clr)
+	mouth.Move(fyne.Position{X: x, Y: y})	
+	mouth.Resize(fyne.Size{Width:100, Height: 10})
+	mouth.StrokeColor = color.Black
+	mouth.StrokeWidth = 1.5
+
+	content.Add(mouth)
+}

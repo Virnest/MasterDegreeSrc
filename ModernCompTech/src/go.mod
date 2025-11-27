@@ -1,4 +1,4 @@
-module example.com/m/v2
+module ModernCompTech
 
 go 1.25.4
 
